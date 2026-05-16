@@ -303,138 +303,12 @@
   </div><!-- /.d-main-area -->
 </div><!-- /.d-page-layout -->
 
+<script src="js/academy-data.js"></script>
 <script>
-/* ── Module titles data per program code ── */
-const MODULE_DATA = {
-  'ERM-2026': [
-    'Pengantar Enterprise Risk Management',
-    'Kerangka Kerja ERM & ISO 31000',
-    'Identifikasi & Penilaian Risiko',
-    'Risk Appetite & Toleransi Risiko',
-    'Strategi Mitigasi Risiko',
-    'Risk Monitoring & Pelaporan',
-    'Integrasi ERM dengan Governance',
-    'Studi Kasus & Simulasi ERM',
-  ],
-  'COMP-REG': [
-    'Kerangka Regulasi Perbankan Indonesia',
-    'OJK & Bank Indonesia: Peran & Kewenangan',
-    'Compliance Function dalam Bank',
-    'Manajemen Risiko Kepatuhan',
-    'Anti Pencucian Uang (APU) & PPT',
-    'Know Your Customer (KYC) & CDD',
-    'Pelaporan Regulasi & LTKM',
-    'Sanksi & Penegakan Hukum',
-    'Digital Banking & RegTech',
-    'Simulasi Audit Kepatuhan',
-  ],
-  'GCG-BASIC': [
-    'Prinsip Dasar Good Corporate Governance',
-    'Board Structure & Komite',
-    'Hak Pemegang Saham & Transparansi',
-    'Akuntabilitas & Tanggung Jawab Direksi',
-    'Pengungkapan & Keterbukaan Informasi',
-    'GCG Assessment & Implementasi',
-  ],
-  'ISO-31000': [
-    'Sejarah & Konteks ISO 31000:2018',
-    'Prinsip-Prinsip Manajemen Risiko',
-    'Kerangka Kerja ISO 31000',
-    'Proses Manajemen Risiko',
-    'Implementasi & Pemantauan',
-  ],
-  'AML-2026': [
-    'Pengantar Anti-Money Laundering',
-    'Tipologi & Modus Pencucian Uang',
-    'Regulasi APU/PPT di Indonesia',
-    'Customer Due Diligence (CDD)',
-    'Transaction Monitoring & STR',
-    'KYC Enhanced Due Diligence',
-    'Studi Kasus AML Internasional',
-  ],
-  'ESG-GRCC': [
-    'Pengantar ESG & Sustainability',
-    'Environmental Reporting (GRI & TCFD)',
-    'Social Impact & Human Rights',
-    'Governance dalam Kerangka ESG',
-    'ESG Scoring & Rating',
-    'Menyusun Sustainability Report',
-  ],
-  'ITHD-2026': [
-    'Lanskap Ancaman Siber Terkini',
-    'Kerangka Keamanan: NIST & ISO 27001',
-    'IT Risk Assessment',
-    'Data Privacy & PDPA',
-    'Incident Response & Business Continuity',
-    'Cloud Security & Third-Party Risk',
-    'Audit Keamanan Siber',
-  ],
-  'OPS-RISK': [
-    'Pengantar Risiko Operasional',
-    'Kerangka Basel III & Risiko Operasional',
-    'Identifikasi & Pemetaan Risiko Ops',
-    'Key Risk Indicators (KRI)',
-    'Business Continuity Planning',
-    'Loss Data Collection & Analisis',
-  ],
-  'AUDIT-INT': [
-    'Standar Audit Internal (IPPF & IIA)',
-    'Perencanaan Audit Berbasis Risiko',
-    'Prosedur & Teknik Audit',
-    'Audit IT & Sistem Informasi',
-    'Audit Kepatuhan & Regulasi',
-    'Komunikasi Hasil Audit',
-    'Quality Assurance & Improvement',
-    'Studi Kasus Audit Internal',
-  ],
-  'TAXRISK': [
-    'Pengantar Manajemen Risiko Pajak',
-    'Transfer Pricing: Prinsip Arm\'s Length',
-    'Dokumentasi Transfer Pricing',
-    'Tax Controversy & Sengketa Pajak',
-    'Tax Risk Assessment & Mitigasi',
-  ],
-  'FRAUD-GRC': [
-    'Konsep Dasar Fraud & Korupsi',
-    'Fraud Risk Assessment',
-    'Sistem Pengendalian Internal Anti-Fraud',
-    'Investigasi Fraud',
-    'Whistleblowing & Speak-Up Culture',
-    'Studi Kasus Fraud Korporasi',
-  ],
-  'BCMS-ISO': [
-    'Pengantar Business Continuity Management',
-    'ISO 22301: Struktur & Persyaratan',
-    'Business Impact Analysis (BIA)',
-    'Strategi BCM & Recovery',
-    'Pengembangan & Pengujian BCP',
-    'Latihan & Simulasi BCM',
-    'Sertifikasi & Pemeliharaan BCMS',
-  ],
-};
-
-const PROG_INFO = {
-  'ERM-2026':  { title:'Enterprise Risk Management (ERM) — Fundamental', category:'Risk Management', level:'Intermediate', icon:'⚖️', hours:24 },
-  'COMP-REG':  { title:'Kepatuhan Regulasi Perbankan & Keuangan', category:'Compliance', level:'Advanced', icon:'🏦', hours:30 },
-  'GCG-BASIC': { title:'Tata Kelola Perusahaan yang Baik (GCG)', category:'Governance', level:'Basic', icon:'🏛️', hours:18 },
-  'ISO-31000': { title:'Implementasi ISO 31000:2018', category:'Risk Management', level:'Intermediate', icon:'📋', hours:15 },
-  'AML-2026':  { title:'Anti-Money Laundering & KYC Praktis', category:'Compliance', level:'Intermediate', icon:'🔍', hours:21 },
-  'ESG-GRCC':  { title:'ESG & Sustainability Reporting', category:'ESG', level:'Basic', icon:'🌱', hours:18 },
-  'ITHD-2026': { title:'IT Risk & Keamanan Siber untuk Praktisi GRC', category:'IT Risk', level:'Intermediate', icon:'🔐', hours:21 },
-  'OPS-RISK':  { title:'Manajemen Risiko Operasional', category:'Risk Management', level:'Intermediate', icon:'⚙️', hours:18 },
-  'AUDIT-INT': { title:'Audit Internal Berbasis Risiko', category:'Governance', level:'Advanced', icon:'🔎', hours:24 },
-  'TAXRISK':   { title:'Manajemen Risiko Pajak & Transfer Pricing', category:'Compliance', level:'Advanced', icon:'📊', hours:15 },
-  'FRAUD-GRC': { title:'Fraud Prevention & Anti-Korupsi', category:'Governance', level:'Intermediate', icon:'🛡️', hours:18 },
-  'BCMS-ISO':  { title:'Business Continuity Management (ISO 22301)', category:'Risk Management', level:'Advanced', icon:'🔄', hours:21 },
-};
+const { getEnrolled, getProgram, getProgramModules } = window.GRCCAcademy;
 
 /* ── State ── */
 let activeCode = null;
-
-function getEnrolled() {
-  const email = (localStorage.getItem('grcc_email') || localStorage.getItem('grcc_user_key') || 'guest').toLowerCase();
-  try { return JSON.parse(localStorage.getItem('grcc_enrolled_' + email) || '[]'); } catch(e) { return []; }
-}
 
 function getModDurMins(totalHours, totalMods) {
   const h = parseInt(totalHours) || 0;
@@ -476,8 +350,8 @@ function renderPage() {
 
   // Get active program
   const prog = enrolled.find(e => e.code === activeCode);
-  const info = PROG_INFO[activeCode] || {};
-  const mods = MODULE_DATA[activeCode] || Array.from({length: prog.modules || 5}, (_,i) => `Modul ${i+1}`);
+  const info = getProgram(activeCode) || {};
+  const mods = getProgramModules(activeCode);
   const currentMod = prog.currentModule || 1;
   const progress = prog.progress || 0;
   const doneCount = Math.floor((progress / 100) * mods.length);
@@ -574,8 +448,8 @@ function closeModule() {
 function renderModuleView(code, n) {
   const enrolled = getEnrolled();
   const prog = enrolled.find(e => e.code === code);
-  const info = PROG_INFO[code] || {};
-  const mods = MODULE_DATA[code] || [];
+  const info = getProgram(code) || {};
+  const mods = getProgramModules(code);
   const total = mods.length;
   const idx = Math.max(0, Math.min(n - 1, total - 1));
   const modTitle = mods[idx] || `Modul ${n}`;

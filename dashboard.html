@@ -853,7 +853,10 @@
 
 <div class="toast-container" style="position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;"></div>
 
+<script src="js/academy-data.js"></script>
 <script>
+const { seedDemoEnrollmentsForCurrentUser, moduleHref } = window.GRCCAcademy;
+
 // ── Role guard + populate UI ──
 (function() {
   const role = localStorage.getItem('grcc_role') || 'peserta';
@@ -902,25 +905,7 @@
 
 // ── Load programs from localStorage ──
 (function() {
-  var DEMO = [
-    { code: 'ERM-2026',  title: 'Enterprise Risk Management (ERM)', category: 'Risk Management', icon: '⚖️', modules: 8,  progress: 68,  currentModule: 6, status: 'active' },
-    { code: 'COMP-REG',  title: 'Kepatuhan Regulasi Perbankan',     category: 'Compliance',     icon: '🏦', modules: 10, progress: 15,  currentModule: 2, status: 'pre-test' },
-    { code: 'GCG-BASIC', title: 'Tata Kelola Perusahaan (GCG)',     category: 'Governance',     icon: '🏛️', modules: 6,  progress: 100, currentModule: 6, status: 'done' },
-  ];
-
-  var email = (localStorage.getItem('grcc_email') || localStorage.getItem('grcc_user_key') || 'guest').toLowerCase();
-  var enrolledKey = 'grcc_enrolled_' + email;
-  var enrolled;
-  try { enrolled = JSON.parse(localStorage.getItem(enrolledKey) || 'null'); } catch(e) { enrolled = null; }
-  if (!Array.isArray(enrolled)) enrolled = [];
-  if (enrolled.length === 0 && email === 'peserta@grcc.id') {
-    enrolled = DEMO;
-    localStorage.setItem(enrolledKey, JSON.stringify(enrolled));
-  }
-
-  function moduleHref(p) {
-    return 'materi.html#prog=' + encodeURIComponent(p.code) + '&mod=' + encodeURIComponent(p.currentModule || 1);
-  }
+  var enrolled = seedDemoEnrollmentsForCurrentUser();
 
   function renderEmptyDashboard() {
     var pillsRow = document.getElementById('dPillsRow');

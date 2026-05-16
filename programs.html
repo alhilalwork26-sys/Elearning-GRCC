@@ -398,31 +398,9 @@
   </div>
 </div>
 
+<script src="js/academy-data.js"></script>
 <script>
-/* ─────────────────────────────────────────
-   Helpers
-───────────────────────────────────────── */
-const CAT_BADGE = {
-  'Risk Management': '<span class="badge badge-gold">Risk Management</span>',
-  'Compliance':      '<span class="badge badge-teal">Compliance</span>',
-  'Governance':      '<span class="badge badge-info">Governance</span>',
-  'ESG':             '<span class="badge badge-success">ESG</span>',
-  'IT Risk':         '<span class="badge badge-navy">IT Risk</span>',
-};
-const LEVEL_BADGE = {
-  'Basic':        '<span class="badge" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;">Basic</span>',
-  'Intermediate': '<span class="badge" style="background:#fefce8;color:#854d0e;border:1px solid #fef08a;">Intermediate</span>',
-  'Advanced':     '<span class="badge" style="background:#fdf4ff;color:#7e22ce;border:1px solid #e9d5ff;">Advanced</span>',
-};
-
-function getEnrolled() {
-  const email = (localStorage.getItem('grcc_email') || localStorage.getItem('grcc_user_key') || 'guest').toLowerCase();
-  try { return JSON.parse(localStorage.getItem('grcc_enrolled_' + email) || '[]'); } catch(e) { return []; }
-}
-
-function moduleHref(p) {
-  return 'materi.html#prog=' + encodeURIComponent(p.code) + '&mod=' + encodeURIComponent(p.currentModule || 1);
-}
+const { CAT_BADGE, LEVEL_BADGE, getEnrolled, moduleHref } = window.GRCCAcademy;
 
 /* ─────────────────────────────────────────
    Auth & Sidebar
