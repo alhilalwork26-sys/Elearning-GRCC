@@ -355,7 +355,7 @@
         Enroll Program
       </a>
       <span class="d-nav-section-label" style="margin-top:16px;">PENGATURAN</span>
-      <a href="#" class="d-nav-link">
+      <a href="profile.html" class="d-nav-link">
         <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20v-2a8 8 0 0 1 16 0v2"/></svg></span>
         Profil Saya
       </a>
@@ -555,7 +555,7 @@ function renderEmpty(container) {
 function renderPrograms(container, enrolled) {
   const total    = enrolled.length;
   const ongoing  = enrolled.filter(p => p.status === 'active' && p.progress < 100).length;
-  const done     = enrolled.filter(p => p.status === 'done' || p.progress >= 100).length;
+  const done     = enrolled.filter(p => p.certificateIssued || p.finalPassed || p.status === 'done').length;
   const pretest  = enrolled.filter(p => p.status === 'pre-test').length;
 
   container.innerHTML = `
@@ -662,22 +662,35 @@ function renderCards(enrolled) {
    Card builder
 ───────────────────────────────────────── */
 function buildCard(p) {
-  const isDone   = p.status === 'done' || p.progress >= 100;
+  const isCertified = p.certificateIssued || p.finalPassed || p.status === 'done';
+  const needsQuiz = p.progress >= 100 && !p.quizPassed;
+  const needsFinal = p.progress >= 100 && p.quizPassed && !p.finalPassed;
+  const isDone   = isCertified;
   const isPre    = p.status === 'pre-test';
   const pct      = p.progress || 0;
-  const mod      = isDone ? 'Selesai' : `Modul ${p.currentModule||1} dari ${p.modules}`;
+  const mod      = isDone ? 'Selesai' : needsQuiz ? 'Materi selesai' : needsFinal ? 'Siap Final Exam' : `Modul ${p.currentModule||1} dari ${p.modules}`;
   const date     = p.enrolledAt ? new Date(p.enrolledAt).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}) : '-';
   const accentCls = isDone ? 'done' : (isPre ? 'pre' : 'new');
   const barCls    = isDone ? 'done' : (isPre ? 'pre' : '');
 
   let actionBtn;
   if (isDone) {
-    actionBtn = `<a href="certificate.html" class="btn-lanjut success">
+    actionBtn = `<a href="certificate.html?code=${p.code}" class="btn-lanjut success">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
       Unduh Sertifikat
     </a>`;
+  } else if (needsQuiz) {
+    actionBtn = `<a href="quiz.html?code=${p.code}" class="btn-lanjut warning">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Kerjakan Quiz
+    </a>`;
+  } else if (needsFinal) {
+    actionBtn = `<a href="exam.html?code=${p.code}&type=final" class="btn-lanjut warning">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Final Exam
+    </a>`;
   } else if (isPre) {
-    actionBtn = `<a href="exam.html" class="btn-lanjut warning">
+    actionBtn = `<a href="exam.html?code=${p.code}&type=pretest" class="btn-lanjut warning">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Mulai Pre-Test
     </a>`;
@@ -690,6 +703,10 @@ function buildCard(p) {
 
   const statusBadge = isDone
     ? `<span class="badge badge-success">✓ Lulus</span>`
+    : needsQuiz
+      ? `<span class="badge badge-warning">Perlu Quiz</span>`
+      : needsFinal
+        ? `<span class="badge badge-warning">Perlu Final</span>`
     : isPre
       ? `<span class="badge badge-warning">Pre-Test Wajib</span>`
       : `<span class="badge badge-success">Sedang Berjalan</span>`;
@@ -756,24 +773,33 @@ function buildCard(p) {
    List item builder
 ───────────────────────────────────────── */
 function buildListItem(p) {
-  const isDone = p.status === 'done' || p.progress >= 100;
+  const isDone = p.certificateIssued || p.finalPassed || p.status === 'done';
+  const needsQuiz = p.progress >= 100 && !p.quizPassed;
+  const needsFinal = p.progress >= 100 && p.quizPassed && !p.finalPassed;
   const isPre  = p.status === 'pre-test';
   const pct    = p.progress || 0;
   const barCls = isDone ? 'done' : (isPre ? 'pre' : '');
+  const rowHref = isDone ? `certificate.html?code=${p.code}` : needsQuiz ? `quiz.html?code=${p.code}` : needsFinal ? `exam.html?code=${p.code}&type=final` : moduleHref(p);
 
   const statusBadge = isDone
     ? `<span class="badge badge-success">✓ Lulus</span>`
+    : needsQuiz
+      ? `<span class="badge badge-warning">Quiz</span>`
+      : needsFinal
+        ? `<span class="badge badge-warning">Final</span>`
     : isPre
       ? `<span class="badge badge-warning">Pre-Test</span>`
       : `<span class="badge badge-success">Berlangsung</span>`;
 
   let actionBtn;
-  if (isDone)    actionBtn = `<a href="certificate.html" class="btn btn-success btn-sm">Sertifikat</a>`;
-  else if (isPre) actionBtn = `<a href="exam.html" class="btn btn-outline btn-sm">Pre-Test</a>`;
+  if (isDone)    actionBtn = `<a href="certificate.html?code=${p.code}" class="btn btn-success btn-sm">Sertifikat</a>`;
+  else if (needsQuiz) actionBtn = `<a href="quiz.html?code=${p.code}" class="btn btn-outline btn-sm">Quiz</a>`;
+  else if (needsFinal) actionBtn = `<a href="exam.html?code=${p.code}&type=final" class="btn btn-outline btn-sm">Final</a>`;
+  else if (isPre) actionBtn = `<a href="exam.html?code=${p.code}&type=pretest" class="btn btn-outline btn-sm">Pre-Test</a>`;
   else           actionBtn = `<a href="${moduleHref(p)}" class="btn btn-primary btn-sm">Lanjutkan</a>`;
 
   return `
-  <div class="prog-list-item" onclick="location.href='${moduleHref(p)}'">
+  <div class="prog-list-item" onclick="location.href='${rowHref}'">
     <div class="prog-list-icon">${p.icon || '📘'}</div>
     <div class="prog-list-main">
       <div class="prog-list-code">${p.code}</div>

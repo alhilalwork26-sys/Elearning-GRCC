@@ -430,6 +430,7 @@
   function recordQuizResult(code, score, passingScore) {
     const target = getActiveEnrollment(code);
     if (!target) return null;
+    if (target.progress < 100) return null;
     const pass = Number(score) >= Number(passingScore || 60);
     return updateEnrollment(target.code, (enrollment) => ({
       ...enrollment,

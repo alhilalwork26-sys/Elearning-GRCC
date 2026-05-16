@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Saya - GRCC Academy</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/d-sidebar.css">
+  <style>
+    .profile-grid { display:grid; grid-template-columns: 360px 1fr; gap:20px; }
+    .profile-panel { background:var(--white); border:1.5px solid var(--border); border-radius:var(--r-lg); padding:24px; }
+    .profile-card { text-align:center; }
+    .profile-avatar-lg { width:92px; height:92px; border-radius:28px; margin:0 auto 16px; background:linear-gradient(135deg,var(--navy),var(--teal)); color:white; display:flex; align-items:center; justify-content:center; font-family:var(--font-h); font-size:1.8rem; font-weight:900; }
+    .profile-name { font-family:var(--font-h); font-size:1.35rem; font-weight:900; color:var(--navy); margin-bottom:4px; }
+    .profile-email { color:var(--text-sm); font-size:.9rem; margin-bottom:16px; }
+    .profile-metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:18px; }
+    .profile-metric { background:var(--bg); border:1px solid var(--border); border-radius:var(--r-md); padding:14px; }
+    .profile-metric-val { font-family:var(--font-h); font-size:1.25rem; font-weight:900; color:var(--navy); }
+    .profile-metric-label { font-size:.75rem; color:var(--text-xs); margin-top:2px; }
+    .profile-section-title { font-family:var(--font-h); font-size:1.05rem; font-weight:850; color:var(--navy); margin-bottom:16px; }
+    .profile-form { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+    .profile-field label { display:block; font-size:.78rem; font-weight:700; color:var(--navy); margin-bottom:6px; }
+    .profile-field input { width:100%; box-sizing:border-box; border:1.5px solid var(--border); border-radius:var(--r-md); padding:11px 13px; font:inherit; color:var(--text); outline:none; }
+    .profile-field input:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(20,184,166,.12); }
+    .profile-programs { display:flex; flex-direction:column; gap:10px; }
+    .profile-program { display:flex; align-items:center; gap:12px; padding:14px; border:1.5px solid var(--border); border-radius:var(--r-md); text-decoration:none; color:inherit; transition:.2s; }
+    .profile-program:hover { border-color:var(--teal); box-shadow:var(--sh); }
+    .profile-program-icon { width:42px; height:42px; border-radius:var(--r); background:rgba(20,184,166,.1); display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0; }
+    .profile-program-main { flex:1; min-width:0; }
+    .profile-program-title { font-weight:800; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .profile-program-meta { font-size:.78rem; color:var(--text-xs); margin-top:3px; }
+    .profile-bar { width:120px; height:8px; border-radius:99px; background:var(--border); overflow:hidden; flex-shrink:0; }
+    .profile-bar-fill { height:100%; background:var(--teal); border-radius:inherit; }
+    .profile-toast { position:fixed; right:24px; bottom:24px; background:var(--navy); color:white; padding:13px 18px; border-radius:var(--r-md); box-shadow:var(--sh-lg); opacity:0; transform:translateY(8px); transition:.2s; z-index:1000; }
+    .profile-toast.show { opacity:1; transform:translateY(0); }
+    @media (max-width:900px) {
+      .profile-grid { grid-template-columns:1fr; }
+      .profile-form { grid-template-columns:1fr; }
+      .profile-bar { width:86px; }
+    }
+  </style>
+</head>
+<body>
+<div class="d-page-layout">
+  <div class="d-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <aside class="d-sidebar" id="sidebar">
+    <a href="dashboard.html" class="d-sidebar-brand" id="dashLink">
+      <div class="d-sidebar-logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="d-sidebar-brand-name">GRCC Academy</span>
+    </a>
+    <nav class="d-sidebar-nav">
+      <span class="d-nav-section-label">OVERVIEW</span>
+      <a href="dashboard.html" class="d-nav-link"><span class="d-nav-icon">□</span>Dashboard</a>
+      <a href="helpdesk.html" class="d-nav-link"><span class="d-nav-icon">?</span>Helpdesk</a>
+      <a href="materi.html" class="d-nav-link"><span class="d-nav-icon">M</span>Materi</a>
+      <a href="quiz.html" class="d-nav-link"><span class="d-nav-icon">Q</span>Quiz &amp; Latihan</a>
+      <a href="exam.html" class="d-nav-link"><span class="d-nav-icon">E</span>Ujian</a>
+      <a href="certificate.html" class="d-nav-link"><span class="d-nav-icon">S</span>Sertifikat</a>
+      <a href="programs.html" class="d-nav-link"><span class="d-nav-icon">P</span>Program</a>
+      <a href="enroll.html" class="d-nav-link"><span class="d-nav-icon">+</span>Enroll Program</a>
+      <span class="d-nav-section-label" style="margin-top:16px;">PENGATURAN</span>
+      <a href="profile.html" class="d-nav-link active"><span class="d-nav-icon">A</span>Profil Saya</a>
+      <a href="login.html" class="d-nav-link d-nav-logout" id="logoutLink"><span class="d-nav-icon">X</span>Keluar</a>
+    </nav>
+    <div class="d-sidebar-user">
+      <div class="d-sidebar-avatar" id="dSidebarAvatar">AF</div>
+      <div class="d-sidebar-user-info">
+        <div class="d-sidebar-name" id="dSidebarName">Ahmad Fauzi</div>
+        <div class="d-sidebar-role-txt" id="dSidebarRole">Peserta Aktif</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="d-main-area">
+    <header class="d-page-topbar">
+      <button class="d-hamburger" onclick="openSidebar()" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="d-page-topbar-title">Profil Saya</span>
+      <div style="flex:1;"></div>
+      <a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a>
+    </header>
+
+    <div class="app-page">
+      <div class="profile-grid">
+        <section class="profile-panel profile-card">
+          <div class="profile-avatar-lg" id="profileAvatar">AF</div>
+          <div class="profile-name" id="profileName">Ahmad Fauzi</div>
+          <div class="profile-email" id="profileEmail">peserta@grcc.id</div>
+          <span class="badge badge-success">Peserta Aktif</span>
+          <div class="profile-metrics">
+            <div class="profile-metric">
+              <div class="profile-metric-val" id="metricPrograms">0</div>
+              <div class="profile-metric-label">Program</div>
+            </div>
+            <div class="profile-metric">
+              <div class="profile-metric-val" id="metricCerts">0</div>
+              <div class="profile-metric-label">Sertifikat</div>
+            </div>
+            <div class="profile-metric">
+              <div class="profile-metric-val" id="metricAvg">0%</div>
+              <div class="profile-metric-label">Rata-rata</div>
+            </div>
+            <div class="profile-metric">
+              <div class="profile-metric-val" id="metricActive">0</div>
+              <div class="profile-metric-label">Aktif</div>
+            </div>
+          </div>
+        </section>
+
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <section class="profile-panel">
+            <div class="profile-section-title">Data Akun</div>
+            <form class="profile-form" id="profileForm">
+              <div class="profile-field">
+                <label for="nameInput">Nama Lengkap</label>
+                <input id="nameInput" type="text">
+              </div>
+              <div class="profile-field">
+                <label for="emailInput">Email</label>
+                <input id="emailInput" type="email">
+              </div>
+              <div class="profile-field">
+                <label for="institutionInput">Institusi</label>
+                <input id="institutionInput" type="text" placeholder="Nama institusi">
+              </div>
+              <div class="profile-field">
+                <label for="phoneInput">Nomor HP</label>
+                <input id="phoneInput" type="tel" placeholder="+62">
+              </div>
+              <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:10px;margin-top:4px;">
+                <button class="btn btn-primary" type="submit">Simpan Profil</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="profile-panel">
+            <div class="profile-section-title">Ringkasan Program</div>
+            <div class="profile-programs" id="programList"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="profile-toast" id="toast">Profil tersimpan</div>
+
+<script src="js/academy-data.js"></script>
+<script>
+const { getEnrolled, moduleHref } = window.GRCCAcademy;
+
+function initials(name) {
+  return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'AF';
+}
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+
+function renderProfile() {
+  const name = localStorage.getItem('grcc_name') || 'Ahmad Fauzi, S.E.';
+  const email = localStorage.getItem('grcc_email') || 'peserta@grcc.id';
+  const role = localStorage.getItem('grcc_role') || 'peserta';
+  const roleLabel = { peserta:'Peserta Aktif', admin:'Administrator', instruktur:'Instruktur' };
+  const dashMap = { peserta:'dashboard.html', admin:'admin.html', instruktur:'instruktur.html' };
+  const enrolled = getEnrolled();
+  const certs = enrolled.filter(e => e.certificateIssued || e.finalPassed).length;
+  const avg = enrolled.length ? Math.round(enrolled.reduce((sum, e) => sum + Number(e.progress || 0), 0) / enrolled.length) : 0;
+  const active = enrolled.filter(e => !e.certificateIssued && !e.finalPassed).length;
+  const init = initials(name);
+
+  document.getElementById('dashLink').href = dashMap[role] || 'dashboard.html';
+  document.getElementById('dSidebarAvatar').textContent = init;
+  document.getElementById('dSidebarName').textContent = name;
+  document.getElementById('dSidebarRole').textContent = roleLabel[role] || 'Peserta Aktif';
+  document.getElementById('profileAvatar').textContent = init;
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('profileEmail').textContent = email;
+  document.getElementById('nameInput').value = name;
+  document.getElementById('emailInput').value = email;
+  document.getElementById('institutionInput').value = localStorage.getItem('grcc_institution') || '';
+  document.getElementById('phoneInput').value = localStorage.getItem('grcc_phone') || '';
+  document.getElementById('metricPrograms').textContent = enrolled.length;
+  document.getElementById('metricCerts').textContent = certs;
+  document.getElementById('metricAvg').textContent = avg + '%';
+  document.getElementById('metricActive').textContent = active;
+
+  const list = document.getElementById('programList');
+  if (!enrolled.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--text-xs);padding:28px;"><p style="margin-bottom:14px;">Belum ada program yang diikuti.</p><a href="enroll.html" class="btn btn-primary">Enroll Program</a></div>';
+    return;
+  }
+  list.innerHTML = enrolled.map(e => {
+    const href = e.certificateIssued ? `certificate.html?code=${e.code}` : moduleHref(e);
+    return `<a href="${href}" class="profile-program">
+      <div class="profile-program-icon">${e.icon || 'P'}</div>
+      <div class="profile-program-main">
+        <div class="profile-program-title">${e.title}</div>
+        <div class="profile-program-meta">${e.code} - ${e.progress}% selesai</div>
+      </div>
+      <div class="profile-bar"><div class="profile-bar-fill" style="width:${e.progress}%"></div></div>
+    </a>`;
+  }).join('');
+}
+
+document.getElementById('profileForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const oldEmail = (localStorage.getItem('grcc_email') || localStorage.getItem('grcc_user_key') || 'guest').toLowerCase();
+  const newEmail = (document.getElementById('emailInput').value.trim() || 'peserta@grcc.id').toLowerCase();
+  const oldEnrollKey = 'grcc_enrolled_' + oldEmail;
+  const newEnrollKey = 'grcc_enrolled_' + newEmail;
+  if (oldEnrollKey !== newEnrollKey && localStorage.getItem(oldEnrollKey) && !localStorage.getItem(newEnrollKey)) {
+    localStorage.setItem(newEnrollKey, localStorage.getItem(oldEnrollKey));
+  }
+  localStorage.setItem('grcc_name', document.getElementById('nameInput').value.trim() || 'Peserta GRCC');
+  localStorage.setItem('grcc_email', newEmail);
+  localStorage.setItem('grcc_user_key', newEmail);
+  localStorage.setItem('grcc_institution', document.getElementById('institutionInput').value.trim());
+  localStorage.setItem('grcc_phone', document.getElementById('phoneInput').value.trim());
+  renderProfile();
+  showToast('Profil berhasil disimpan');
+});
+
+document.getElementById('logoutLink').addEventListener('click', event => {
+  event.preventDefault();
+  localStorage.removeItem('grcc_role');
+  localStorage.removeItem('grcc_name');
+  localStorage.removeItem('grcc_email');
+  localStorage.removeItem('grcc_user_key');
+  window.location.href = 'login.html';
+});
+
+renderProfile();
+</script>
+</body>
+</html>

@@ -280,7 +280,7 @@
         Enroll Program
       </a>
       <span class="d-nav-section-label" style="margin-top:16px;">PENGATURAN</span>
-      <a href="#" class="d-nav-link">
+      <a href="profile.html" class="d-nav-link">
         <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20v-2a8 8 0 0 1 16 0v2"/></svg></span>
         Profil Saya
       </a>
@@ -510,11 +510,50 @@
 
 <script src="js/academy-data.js"></script>
 <script>
-  const { getActiveEnrollment, recordQuizResult } = window.GRCCAcademy;
+  const { getActiveEnrollment, getProgramModules, recordQuizResult } = window.GRCCAcademy;
   const activeProgramCode = new URLSearchParams(location.search).get('code') || (getActiveEnrollment()?.code || null);
+  const activeEnrollment = getActiveEnrollment(activeProgramCode);
   let currentQ = 0;
   let answers = {};
   const total = 5;
+
+  function syncQuizHeader() {
+    const back = document.querySelector('.quiz-back-btn');
+    if (back && activeEnrollment) back.href = `materi.html#prog=${encodeURIComponent(activeEnrollment.code)}`;
+    const title = document.querySelector('.quiz-title');
+    if (title && activeEnrollment) {
+      const modules = getProgramModules(activeEnrollment.code);
+      const lastModule = modules[Math.max(0, Math.min(modules.length - 1, activeEnrollment.modules - 1))] || activeEnrollment.title;
+      title.textContent = `Quiz — ${activeEnrollment.code}: ${lastModule}`;
+    }
+  }
+
+  function showQuizLocked() {
+    const target = activeEnrollment ? `materi.html#prog=${encodeURIComponent(activeEnrollment.code)}` : 'materi.html';
+    document.querySelector('.quiz-progress-wrap').style.display = 'none';
+    document.getElementById('quizProgressPct').style.display = 'none';
+    document.getElementById('quizProg').textContent = 'Quiz terkunci';
+    document.getElementById('quiz-main').innerHTML = `
+      <div class="quiz-content">
+        <div class="quiz-result-card">
+          <div class="result-score-circle fail">
+            <div class="result-score-val">!</div>
+            <div class="result-score-label">Lock</div>
+          </div>
+          <h2 class="result-title">Quiz Belum Bisa Dibuka</h2>
+          <p class="result-sub">Selesaikan seluruh modul pada program aktif terlebih dahulu.</p>
+          <div class="result-actions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <a href="${target}" class="btn btn-primary">Kembali ke Materi</a>
+            <a href="programs.html" class="btn btn-ghost">Lihat Program</a>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('quiz-result').style.display = 'none';
+  }
+
+  function quizAllowed() {
+    return Boolean(activeEnrollment && activeEnrollment.progress >= 100);
+  }
 
   function updateUI() {
     const prog = document.getElementById('quizProg');
@@ -607,7 +646,12 @@
     }
   }
 
-  updateUI();
+  syncQuizHeader();
+  if (quizAllowed()) {
+    updateUI();
+  } else {
+    showQuizLocked();
+  }
 
   // ── Role-aware navigation & sidebar ──
   (function() {
