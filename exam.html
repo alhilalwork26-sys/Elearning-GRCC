@@ -528,7 +528,11 @@
 </div><!-- /.d-page-layout -->
 
 <div class="toast-container"></div>
+<script src="js/academy-data.js"></script>
 <script>
+  const { getActiveEnrollment, recordExamResult } = window.GRCCAcademy;
+  const examParams = new URLSearchParams(location.search);
+  const activeProgramCode = examParams.get('code') || (getActiveEnrollment()?.code || null);
   let currentExamType = 'pretest';
   let currentQ = 0;
   let answers = {};
@@ -540,6 +544,10 @@
     posttest: { label: 'Post-Test', soal: 30, durasi: 45, passing: null },
     final: { label: 'Final Exam', soal: 50, durasi: 90, passing: 70 }
   };
+
+  if (examParams.get('type') && examConfig[examParams.get('type')]) {
+    currentExamType = examParams.get('type');
+  }
 
   function startExam(type) {
     currentExamType = type;
@@ -644,6 +652,7 @@
     const score = Math.round(correct / total * 100);
     const cfg = examConfig[currentExamType];
     const pass = cfg.passing ? score >= cfg.passing : null;
+    const saved = recordExamResult(activeProgramCode, currentExamType, score, cfg.passing);
     document.getElementById('exam-main').style.display = 'none';
     document.getElementById('timerWrap').style.display = 'none';
     const result = document.getElementById('quiz-result');
@@ -665,11 +674,12 @@
     const targetDash = dashMap2[role2] || 'dashboard.html';
     const actEl = document.getElementById('result-actions');
     if (pass === false) {
-      actEl.innerHTML = `<button onclick="location.reload()" class="btn btn-outline">Coba Lagi</button><a href="materi.html" class="btn btn-ghost">Pelajari Ulang Materi</a>`;
+      actEl.innerHTML = `<button onclick="location.reload()" class="btn btn-outline">Coba Lagi</button><a href="materi.html${saved ? '#prog=' + saved.code : ''}" class="btn btn-ghost">Pelajari Ulang Materi</a>`;
     } else if (pass) {
-      actEl.innerHTML = `<a href="certificate.html" class="btn btn-primary">🏆 Lihat Sertifikat</a><a href="${targetDash}" class="btn btn-outline">Kembali ke Dashboard</a>`;
+      actEl.innerHTML = `<a href="certificate.html${saved ? '?code=' + saved.code : ''}" class="btn btn-primary">🏆 Lihat Sertifikat</a><a href="${targetDash}" class="btn btn-outline">Kembali ke Dashboard</a>`;
     } else {
-      actEl.innerHTML = `<a href="exam.html" class="btn btn-primary">Lanjut ke Post-Test</a><a href="${targetDash}" class="btn btn-outline">Dashboard</a>`;
+      const nextType = currentExamType === 'pretest' ? 'posttest' : 'final';
+      actEl.innerHTML = `<a href="exam.html${saved ? '?code=' + saved.code + '&type=' + nextType : ''}" class="btn btn-primary">${nextType === 'final' ? 'Lanjut Final Exam' : 'Lanjut ke Post-Test'}</a><a href="${targetDash}" class="btn btn-outline">Dashboard</a>`;
     }
   }
 
@@ -679,6 +689,10 @@
     const dashMap = { peserta:'dashboard.html', admin:'admin.html', instruktur:'instruktur.html' };
     document.querySelectorAll('a[href="dashboard.html"]').forEach(a => { a.href = dashMap[role] || 'dashboard.html'; });
   })();
+
+  if (examParams.get('type') && examConfig[currentExamType]) {
+    startExam(currentExamType);
+  }
 
   // ── Sidebar functions ──
   function openSidebar() {

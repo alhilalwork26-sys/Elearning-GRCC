@@ -284,9 +284,9 @@
   };
 
   const DEMO_ENROLLMENTS = [
-    { code: 'ERM-2026', progress: 68, currentModule: 6, status: 'active' },
-    { code: 'COMP-REG', progress: 15, currentModule: 2, status: 'pre-test' },
-    { code: 'GCG-BASIC', progress: 100, currentModule: 6, status: 'done' },
+    { code: 'ERM-2026', progress: 68, currentModule: 6, status: 'active', completedModules: [1, 2, 3, 4, 5] },
+    { code: 'COMP-REG', progress: 15, currentModule: 2, status: 'active', completedModules: [1] },
+    { code: 'GCG-BASIC', progress: 100, currentModule: 6, status: 'done', completedModules: [1, 2, 3, 4, 5, 6], quizPassed: true, finalPassed: true, certificateIssued: true, finalScore: 92 },
   ];
 
   function getProgram(code) {
@@ -305,18 +305,40 @@
 
   function normalizeEnrollment(enrollment) {
     const program = getProgram(enrollment.code) || {};
+    const modulesCount = enrollment.modules || program.modules || getProgramModules(enrollment.code).length;
+    const completedFromProgress = Math.floor((Number(enrollment.progress || 0) / 100) * modulesCount);
+    const completedModules = Array.isArray(enrollment.completedModules)
+      ? enrollment.completedModules.map(Number).filter((n) => n >= 1 && n <= modulesCount)
+      : Array.from({ length: completedFromProgress }, (_, index) => index + 1);
+    const uniqueCompleted = [...new Set(completedModules)].sort((a, b) => a - b);
+    const progress = modulesCount ? Math.round((uniqueCompleted.length / modulesCount) * 100) : Number(enrollment.progress || 0);
+    const status = enrollment.certificateIssued || progress >= 100 && enrollment.finalPassed ? 'done' : (enrollment.status || 'active');
+
     return {
       code: enrollment.code,
       title: enrollment.title || program.title || enrollment.code,
       category: enrollment.category || program.category || 'GRC',
       level: enrollment.level || program.level || 'Intermediate',
       icon: enrollment.icon || program.icon || '📘',
-      modules: enrollment.modules || program.modules || getProgramModules(enrollment.code).length,
+      modules: modulesCount,
       hours: enrollment.hours || program.hours || '18 jam',
       enrolledAt: enrollment.enrolledAt || new Date().toISOString(),
-      progress: Number(enrollment.progress || 0),
-      currentModule: Number(enrollment.currentModule || 1),
-      status: enrollment.status || 'active',
+      progress,
+      currentModule: Math.min(Number(enrollment.currentModule || uniqueCompleted.length + 1 || 1), modulesCount),
+      status,
+      completedModules: uniqueCompleted,
+      quizScore: enrollment.quizScore || null,
+      quizPassed: Boolean(enrollment.quizPassed),
+      quizCompletedAt: enrollment.quizCompletedAt || null,
+      pretestScore: enrollment.pretestScore || null,
+      pretestCompletedAt: enrollment.pretestCompletedAt || null,
+      posttestScore: enrollment.posttestScore || null,
+      posttestCompletedAt: enrollment.posttestCompletedAt || null,
+      finalScore: enrollment.finalScore || null,
+      finalPassed: Boolean(enrollment.finalPassed),
+      finalCompletedAt: enrollment.finalCompletedAt || null,
+      certificateIssued: Boolean(enrollment.certificateIssued),
+      certificateIssuedAt: enrollment.certificateIssuedAt || null,
     };
   }
 
@@ -362,6 +384,98 @@
     return true;
   }
 
+  function updateEnrollment(code, updater) {
+    const next = getEnrolled();
+    const idx = next.findIndex((enrollment) => enrollment.code === code);
+    if (idx === -1) return null;
+
+    const draft = normalizeEnrollment(next[idx]);
+    const updated = normalizeEnrollment(typeof updater === 'function' ? updater(draft) : { ...draft, ...updater });
+    next[idx] = updated;
+    saveEnrolled(next);
+    return updated;
+  }
+
+  function completeModule(code, moduleNumber) {
+    return updateEnrollment(code, (enrollment) => {
+      const modulesCount = enrollment.modules || getProgramModules(code).length;
+      const completed = new Set(enrollment.completedModules || []);
+      const safeModule = Math.max(1, Math.min(Number(moduleNumber || 1), modulesCount));
+      completed.add(safeModule);
+      const completedModules = [...completed].sort((a, b) => a - b);
+      const nextModule = Math.min(modulesCount, Math.max(enrollment.currentModule || 1, safeModule + 1));
+      const progress = Math.round((completedModules.length / modulesCount) * 100);
+
+      return {
+        ...enrollment,
+        completedModules,
+        currentModule: progress >= 100 ? modulesCount : nextModule,
+        progress,
+        status: progress >= 100 && enrollment.finalPassed ? 'done' : 'active',
+      };
+    });
+  }
+
+  function getActiveEnrollment(code) {
+    const enrolled = getEnrolled();
+    if (code) {
+      const match = enrolled.find((enrollment) => enrollment.code === code);
+      if (match) return match;
+    }
+    return enrolled.find((enrollment) => !enrollment.certificateIssued)
+      || enrolled[0]
+      || null;
+  }
+
+  function recordQuizResult(code, score, passingScore) {
+    const target = getActiveEnrollment(code);
+    if (!target) return null;
+    const pass = Number(score) >= Number(passingScore || 60);
+    return updateEnrollment(target.code, (enrollment) => ({
+      ...enrollment,
+      quizScore: Number(score),
+      quizPassed: pass,
+      quizCompletedAt: new Date().toISOString(),
+    }));
+  }
+
+  function recordExamResult(code, type, score, passingScore) {
+    const target = getActiveEnrollment(code);
+    if (!target) return null;
+    const normalizedType = type || 'final';
+    const pass = passingScore ? Number(score) >= Number(passingScore) : true;
+    const now = new Date().toISOString();
+
+    return updateEnrollment(target.code, (enrollment) => {
+      const patch = { ...enrollment };
+      if (normalizedType === 'pretest') {
+        patch.pretestScore = Number(score);
+        patch.pretestCompletedAt = now;
+      } else if (normalizedType === 'posttest') {
+        patch.posttestScore = Number(score);
+        patch.posttestCompletedAt = now;
+      } else {
+        patch.finalScore = Number(score);
+        patch.finalPassed = pass;
+        patch.finalCompletedAt = now;
+        patch.certificateIssued = pass;
+        patch.certificateIssuedAt = pass ? now : enrollment.certificateIssuedAt;
+        patch.status = pass ? 'done' : 'active';
+        if (pass) {
+          patch.completedModules = Array.from({ length: patch.modules }, (_, index) => index + 1);
+          patch.progress = 100;
+          patch.currentModule = patch.modules;
+        }
+      }
+      return patch;
+    });
+  }
+
+  function getCertificateEnrollment() {
+    return getEnrolled().find((enrollment) => enrollment.certificateIssued)
+      || null;
+  }
+
   function seedDemoEnrollmentsForCurrentUser() {
     const email = (localStorage.getItem('grcc_email') || localStorage.getItem('grcc_user_key') || 'guest').toLowerCase();
     if (email !== 'peserta@grcc.id') return getEnrolled();
@@ -392,6 +506,12 @@
     saveEnrolled,
     isEnrolled,
     enrollProgram,
+    updateEnrollment,
+    completeModule,
+    getActiveEnrollment,
+    recordQuizResult,
+    recordExamResult,
+    getCertificateEnrollment,
     seedDemoEnrollmentsForCurrentUser,
     moduleHref,
   };

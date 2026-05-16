@@ -697,7 +697,73 @@
 </div>
 
 <div class="toast-container"></div>
+<script src="js/academy-data.js"></script>
 <script>
+  const { getEnrolled, getCertificateEnrollment } = window.GRCCAcademy;
+
+  function certDate(iso) {
+    return iso ? new Date(iso).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }) : '-';
+  }
+
+  function renderCertificateState() {
+    const code = new URLSearchParams(location.search).get('code');
+    const eligible = code
+      ? getEnrolled().find(e => e.code === code && e.certificateIssued)
+      : getCertificateEnrollment();
+    const wrap = document.querySelector('.cert-wrap');
+    const printBtn = document.getElementById('print-cert');
+    const downloadBtn = document.getElementById('download-cert');
+
+    if (!eligible) {
+      if (printBtn) printBtn.disabled = true;
+      if (downloadBtn) downloadBtn.disabled = true;
+      if (wrap) {
+        wrap.innerHTML = `
+          <div class="cert-info-bar">
+            <div>
+              <h2>Sertifikat Belum Tersedia</h2>
+              <p>Selesaikan seluruh materi dan lulus Final Exam untuk membuka sertifikat digital.</p>
+            </div>
+            <div class="cert-info-badges">
+              <span class="badge badge-warning">Final Exam diperlukan</span>
+            </div>
+          </div>
+          <div class="mat-empty" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:64px 24px;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:14px;">🏆</div>
+            <h2 style="font-family:var(--font-h);color:var(--navy);font-size:1.4rem;margin-bottom:8px;">Belum Ada Sertifikat Aktif</h2>
+            <p style="color:var(--text-sm);margin-bottom:24px;">Lanjutkan belajar, kerjakan quiz, lalu lulus Final Exam untuk menerbitkan sertifikat.</p>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+              <a href="programs.html" class="btn btn-primary">Lihat Program Saya</a>
+              <a href="exam.html" class="btn btn-outline">Buka Exam</a>
+            </div>
+          </div>`;
+      }
+      return;
+    }
+
+    const name = localStorage.getItem('grcc_name') || 'Ahmad Fauzi, S.E.';
+    const issuedDate = certDate(eligible.certificateIssuedAt || eligible.finalCompletedAt);
+    const certNum = `GRCC/2026/${eligible.code.replace(/[^A-Z0-9]/g, '').slice(0, 6)}/${String(Math.abs(eligible.code.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0))).padStart(6, '0')}`;
+    const recipient = document.querySelector('.cert-recipient-name');
+    const program = document.querySelector('.cert-prog-name');
+    const detailVals = document.querySelectorAll('.cert-detail-val');
+    const certNo = document.querySelector('.cert-num-val');
+    const issued = document.querySelector('.cert-issued-date');
+    const banner = document.querySelector('.cert-verify-banner span');
+
+    if (recipient) recipient.textContent = name;
+    if (program) program.textContent = eligible.title;
+    if (detailVals[0]) detailVals[0].textContent = issuedDate;
+    if (detailVals[1]) detailVals[1].textContent = `${eligible.hours} (${eligible.modules} Modul)`;
+    if (detailVals[2]) detailVals[2].textContent = `${eligible.finalScore || 100} / 100`;
+    if (detailVals[3]) detailVals[3].textContent = 'LULUS';
+    if (certNo) certNo.textContent = certNum;
+    if (issued) issued.textContent = `Diterbitkan: ${issuedDate}`;
+    if (banner) banner.innerHTML = `<strong>Sertifikat Terverifikasi.</strong> Nomor sertifikat <strong>${certNum}</strong> valid dan telah diterbitkan oleh GRCC Academy pada ${issuedDate}.`;
+  }
+
+  renderCertificateState();
+
   // QR Pattern
   function generateQR() {
     const svg = document.getElementById('cert-qr-svg');

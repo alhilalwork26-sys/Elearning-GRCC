@@ -694,7 +694,7 @@
                 <th>AKSI</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="dEvalRows">
               <tr>
                 <td>
                   <div class="d-t-user">
@@ -855,7 +855,7 @@
 
 <script src="js/academy-data.js"></script>
 <script>
-const { seedDemoEnrollmentsForCurrentUser, moduleHref } = window.GRCCAcademy;
+const { seedDemoEnrollmentsForCurrentUser, getProgramModules, moduleHref } = window.GRCCAcademy;
 
 // ── Role guard + populate UI ──
 (function() {
@@ -911,6 +911,7 @@ const { seedDemoEnrollmentsForCurrentUser, moduleHref } = window.GRCCAcademy;
     var pillsRow = document.getElementById('dPillsRow');
     var cardsRow = document.getElementById('dCardsRow');
     var shortcuts = document.getElementById('dProgShortcuts');
+    var evalRows = document.getElementById('dEvalRows');
     if (pillsRow) pillsRow.innerHTML = '';
     if (cardsRow) {
       cardsRow.innerHTML =
@@ -923,6 +924,9 @@ const { seedDemoEnrollmentsForCurrentUser, moduleHref } = window.GRCCAcademy;
     }
     if (shortcuts) {
       shortcuts.innerHTML = '<a href="enroll.html" class="d-prog-shortcut"><div class="d-prog-shortcut-dot" style="background:#14B8A6;"></div>Enroll program baru</a>';
+    }
+    if (evalRows) {
+      evalRows.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:28px;">Belum ada evaluasi. Enroll dan selesaikan materi untuk membuka quiz/exam.</td></tr>';
     }
   }
 
@@ -954,62 +958,48 @@ const { seedDemoEnrollmentsForCurrentUser, moduleHref } = window.GRCCAcademy;
   }
 
   // ── Continue learning cards ──
-  var MODULES = [
-    {
-      title: 'Risk Treatment & Strategi Mitigasi',
-      cat: 'Risk Management',
-      emoji: '⚖️',
-      bg: 'linear-gradient(135deg,#0B2447,#19376D)',
-      instr: 'Dr. Hendri Kurniawan',
-      instrBg: '#0B2447',
-      instrInitial: 'HK',
-      modul: 'Modul 6'
-    },
-    {
-      title: 'Teknik Penilaian Risiko Operasional',
-      cat: 'Risk Management',
-      emoji: '📊',
-      bg: 'linear-gradient(135deg,#14B8A6,#0D9488)',
-      instr: 'Dr. Sri Rahayu',
-      instrBg: '#14B8A6',
-      instrInitial: 'SR',
-      modul: 'Modul 3'
-    },
-    {
-      title: 'Kerangka GCG dan Best Practices',
-      cat: 'Governance',
-      emoji: '🏛️',
-      bg: 'linear-gradient(135deg,#F59E0B,#D97706)',
-      instr: 'Arief Munandar',
-      instrBg: '#F59E0B',
-      instrInitial: 'AM',
-      modul: 'Modul 2'
-    }
-  ];
-
   var cardsRow = document.getElementById('dCardsRow');
   if (cardsRow && enrolled.length > 0) {
-    cardsRow.innerHTML = MODULES.map(function(m, i) {
-      var catCls = CAT_CLASS[m.cat] || 'navy';
-      var active = enrolled[Math.min(i, enrolled.length - 1)] || enrolled[0];
+    cardsRow.innerHTML = enrolled.slice(0, 3).map(function(active, i) {
+      var mods = getProgramModules(active.code);
+      var modIndex = Math.max(0, Math.min((active.currentModule || 1) - 1, mods.length - 1));
+      var catCls = CAT_CLASS[active.category] || 'navy';
+      var bg = ['linear-gradient(135deg,#0B2447,#19376D)', 'linear-gradient(135deg,#14B8A6,#0D9488)', 'linear-gradient(135deg,#F59E0B,#D97706)'][i % 3];
       return '<div class="d-course-card" onclick="location.href=\'' + moduleHref(active) + '\'">' +
-        '<div class="d-course-thumb" style="background:' + m.bg + ';">' +
-          '<div class="d-course-thumb-emoji">' + m.emoji + '</div>' +
+        '<div class="d-course-thumb" style="background:' + bg + ';">' +
+          '<div class="d-course-thumb-emoji">' + (active.icon || '📘') + '</div>' +
           '<button class="d-course-fav" onclick="event.stopPropagation();">♥</button>' +
         '</div>' +
         '<div class="d-course-body">' +
-          '<div class="d-course-cat ' + catCls + '">' + m.modul + ' · ' + m.cat.toUpperCase() + '</div>' +
-          '<div class="d-course-title">' + m.title + '</div>' +
+          '<div class="d-course-cat ' + catCls + '">Modul ' + (active.currentModule || 1) + ' · ' + active.category.toUpperCase() + '</div>' +
+          '<div class="d-course-title">' + (mods[modIndex] || active.title) + '</div>' +
           '<div class="d-course-divider"></div>' +
           '<div class="d-course-instructor">' +
-            '<div class="d-course-instr-avatar" style="background:' + m.instrBg + ';">' + m.instrInitial + '</div>' +
+            '<div class="d-course-instr-avatar" style="background:#0B2447;">GA</div>' +
             '<div>' +
-              '<div class="d-course-instr-name">' + m.instr + '</div>' +
+              '<div class="d-course-instr-name">GRCC Academy</div>' +
               '<div class="d-course-instr-role">Instruktur</div>' +
             '</div>' +
           '</div>' +
         '</div>' +
       '</div>';
+    }).join('');
+  }
+
+  var evalRows = document.getElementById('dEvalRows');
+  if (evalRows && enrolled.length > 0) {
+    evalRows.innerHTML = enrolled.slice(0, 3).map(function(p) {
+      var needsQuiz = p.progress >= 100 && !p.quizPassed;
+      var needsFinal = p.progress >= 100 && p.quizPassed && !p.finalPassed;
+      var type = p.certificateIssued ? 'SERTIFIKAT' : needsQuiz ? 'QUIZ' : needsFinal ? 'FINAL EXAM' : 'MATERI';
+      var pill = p.certificateIssued ? 'teal' : needsQuiz ? 'navy' : needsFinal ? 'gold' : 'teal';
+      var href = p.certificateIssued ? 'certificate.html?code=' + p.code : needsQuiz ? 'quiz.html?code=' + p.code : needsFinal ? 'exam.html?code=' + p.code + '&type=final' : moduleHref(p);
+      return '<tr onclick="location.href=\'' + href + '\'" style="cursor:pointer;">' +
+        '<td><div class="d-t-user"><div class="d-t-avatar" style="background:#0B2447;">GA</div><div><div class="d-t-name">GRCC Academy</div><div class="d-t-date">Progress ' + p.progress + '%</div></div></div></td>' +
+        '<td><span class="d-type-pill ' + pill + '">' + type + '</span></td>' +
+        '<td>' + p.title + '</td>' +
+        '<td><button class="d-action-circle">&#8250;</button></td>' +
+      '</tr>';
     }).join('');
   }
 

@@ -305,7 +305,7 @@
 
 <script src="js/academy-data.js"></script>
 <script>
-const { getEnrolled, getProgram, getProgramModules } = window.GRCCAcademy;
+const { getEnrolled, getProgram, getProgramModules, completeModule } = window.GRCCAcademy;
 
 /* ── State ── */
 let activeCode = null;
@@ -353,8 +353,9 @@ function renderPage() {
   const info = getProgram(activeCode) || {};
   const mods = getProgramModules(activeCode);
   const currentMod = prog.currentModule || 1;
+  const completedModules = prog.completedModules || [];
   const progress = prog.progress || 0;
-  const doneCount = Math.floor((progress / 100) * mods.length);
+  const doneCount = completedModules.length;
   const rawHours = parseInt(prog.hours) || parseInt(info.hours) || 18;
   const hoursPerMod = getModDurMins(rawHours, mods.length);
   const durLabel = hoursPerMod ? `${hoursPerMod} menit` : '—';
@@ -401,9 +402,9 @@ function renderPage() {
     <div class="mat-module-list">
       ${mods.map((title, i) => {
         const n = i + 1;
-        const isDone   = n < currentMod || (progress >= 100);
-        const isActive = n === currentMod;
-        const isLocked = n > currentMod;
+        const isDone   = completedModules.includes(n) || (progress >= 100);
+        const isActive = !isDone && n === currentMod;
+        const isLocked = !isDone && n > currentMod;
         const cls = isDone ? 'mod-done' : isActive ? 'mod-active' : 'mod-locked';
         const badgeLabel = isDone ? 'Selesai' : isActive ? 'Sedang Dipelajari' : 'Terkunci';
         const badgeCls   = isDone ? 'done'    : isActive ? 'active'            : 'locked';
@@ -456,6 +457,8 @@ function renderModuleView(code, n) {
   const rawHours = parseInt(prog?.hours) || parseInt(info.hours) || 18;
   const hoursPerMod = getModDurMins(rawHours, total);
   const progress = prog?.progress || 0;
+  const completedModules = prog?.completedModules || [];
+  const isCompleted = completedModules.includes(n) || progress >= 100;
   const modPct = Math.min(100, Math.round((n / total) * 100));
 
   // Hide tabs while viewing
@@ -558,18 +561,38 @@ function renderModuleView(code, n) {
              </button>`
         }
         ${n < total
-          ? `<button onclick="openModule('${code}',${n+1})" class="btn btn-primary">
-               Modul ${n+1}: ${mods[n] || ''}
-               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-             </button>`
-          : `<button onclick="closeModule()" class="btn btn-primary">
-               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-               Selesai — Kembali ke Daftar
-             </button>`
+          ? (isCompleted
+            ? `<button onclick="openModule('${code}',${n+1})" class="btn btn-primary">
+                 Modul ${n+1}: ${mods[n] || ''}
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+               </button>`
+            : `<button onclick="markModuleComplete('${code}',${n},true)" class="btn btn-primary">
+                 Tandai Selesai &amp; Lanjut
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+               </button>`)
+          : (isCompleted
+            ? `<a href="quiz.html?code=${code}" class="btn btn-primary">
+                 Lanjut ke Quiz
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+               </a>`
+            : `<button onclick="markModuleComplete('${code}',${n},false)" class="btn btn-primary">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                 Tandai Selesai &amp; Lanjut Quiz
+               </button>`)
         }
       </div>
     </div>
   `;
+}
+
+function markModuleComplete(code, n, goNext) {
+  const updated = completeModule(code, n);
+  if (!updated) return;
+  if (goNext) {
+    openModule(code, n + 1);
+  } else {
+    window.location.href = 'quiz.html?code=' + encodeURIComponent(code);
+  }
 }
 
 window.addEventListener('hashchange', () => {

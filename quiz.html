@@ -494,7 +494,7 @@
               <div class="result-stat-lbl">Total Soal</div>
             </div>
           </div>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <div class="result-actions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
             <button onclick="location.reload()" class="btn btn-outline">Coba Lagi</button>
             <a href="materi.html" class="btn btn-ghost">Ulangi Materi</a>
             <a href="exam.html" class="btn btn-primary">Lanjut ke Post-Test &#8594;</a>
@@ -508,7 +508,10 @@
 
 <div class="toast-container"></div>
 
+<script src="js/academy-data.js"></script>
 <script>
+  const { getActiveEnrollment, recordQuizResult } = window.GRCCAcademy;
+  const activeProgramCode = new URLSearchParams(location.search).get('code') || (getActiveEnrollment()?.code || null);
   let currentQ = 0;
   let answers = {};
   const total = 5;
@@ -586,6 +589,7 @@
     });
     const score = Math.round(correct / total * 100);
     const pass = score >= 60;
+    const saved = recordQuizResult(activeProgramCode, score, 60);
     document.getElementById('quiz-main').style.display = 'none';
     const result = document.getElementById('quiz-result');
     result.style.display = 'block';
@@ -595,6 +599,12 @@
     document.getElementById('result-badge').textContent = pass ? '✅ Lulus' : '❌ Tidak Lulus';
     document.getElementById('result-correct').textContent = correct;
     document.getElementById('result-wrong').textContent = total - correct;
+    const actions = document.querySelector('.result-actions');
+    if (actions && saved) {
+      actions.innerHTML = pass
+        ? `<a href="exam.html?code=${saved.code}&type=posttest" class="btn btn-primary">Lanjut ke Post-Test &#8594;</a><a href="materi.html#prog=${saved.code}" class="btn btn-ghost">Lihat Materi</a>`
+        : `<button onclick="location.reload()" class="btn btn-outline">Coba Lagi</button><a href="materi.html#prog=${saved.code}" class="btn btn-ghost">Ulangi Materi</a>`;
+    }
   }
 
   updateUI();
