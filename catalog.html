@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog Program — GRCC Academy</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="topnav" id="topnav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-logo-mark"><img src="assets/grcc-logo.svg" alt="GRCC Logo"></div>
+        <div class="nav-brand-text"><span class="nav-brand-name">GRCC Academy</span><span class="nav-brand-sub">GRC Learning Platform</span></div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Beranda</a>
+        <a href="catalog.html" class="nav-link active">Katalog</a>
+        <a href="helpdesk.html" class="nav-link">Bantuan</a>
+      </div>
+      <div class="nav-actions">
+        <a href="dashboard.html" class="btn btn-outline btn-sm">Dashboard</a>
+        <a href="login.html" class="btn btn-primary btn-sm">Masuk</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="catalog-hero">
+    <div class="container">
+      <div class="sec-eyebrow" style="color:var(--teal-lt);">Katalog Program</div>
+      <h1 class="catalog-hero-title">Temukan Program GRC<br>yang Tepat untuk Anda</h1>
+      <p class="catalog-hero-sub">58 program tersedia dari level pemula hingga sertifikasi internasional</p>
+      <div class="catalog-search">
+        <div class="input-group" style="flex:1;">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="form-control" placeholder="Cari program, topik, instruktur..." id="searchInput">
+        </div>
+        <button class="btn btn-primary">Cari Program</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="container">
+      <div class="filter-inner">
+        <span style="font-size:.8125rem;font-weight:700;color:var(--text-sm);white-space:nowrap;">Kategori:</span>
+        <div class="filter-pills">
+          <button class="filter-pill active" data-cat="all">Semua (58)</button>
+          <button class="filter-pill" data-cat="governance">Governance (12)</button>
+          <button class="filter-pill" data-cat="risk">Risk Management (10)</button>
+          <button class="filter-pill" data-cat="compliance">Compliance (9)</button>
+          <button class="filter-pill" data-cat="audit">Internal Audit (8)</button>
+          <button class="filter-pill" data-cat="esg">ESG / Sustainability (7)</button>
+          <button class="filter-pill" data-cat="publik">Public Sector (6)</button>
+          <button class="filter-pill" data-cat="sertifikasi">Certification Prep (6)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="catalog-content">
+    <div class="container">
+      <div class="catalog-grid">
+        <!-- Sidebar filter -->
+        <aside class="catalog-sidebar">
+          <div class="sidebar-filter-box">
+            <div class="sidebar-filter-title">Level Program</div>
+            <div class="filter-option"><input type="checkbox" id="l1" checked><label for="l1">Pemula</label><span class="filter-count">24</span></div>
+            <div class="filter-option"><input type="checkbox" id="l2" checked><label for="l2">Menengah</label><span class="filter-count">22</span></div>
+            <div class="filter-option"><input type="checkbox" id="l3" checked><label for="l3">Lanjutan</label><span class="filter-count">12</span></div>
+          </div>
+          <div class="sidebar-filter-box">
+            <div class="sidebar-filter-title">Target Peserta</div>
+            <div class="filter-option"><input type="checkbox" id="t1"><label for="t1">Instansi Pemerintah</label></div>
+            <div class="filter-option"><input type="checkbox" id="t2"><label for="t2">BUMN / BUMD</label></div>
+            <div class="filter-option"><input type="checkbox" id="t3"><label for="t3">Perusahaan Swasta</label></div>
+            <div class="filter-option"><input type="checkbox" id="t4"><label for="t4">Individu / Profesional</label></div>
+            <div class="filter-option"><input type="checkbox" id="t5"><label for="t5">Perbankan & Keuangan</label></div>
+          </div>
+          <div class="sidebar-filter-box">
+            <div class="sidebar-filter-title">Durasi</div>
+            <div class="filter-option"><input type="radio" name="dur" id="d1" checked><label for="d1">Semua Durasi</label></div>
+            <div class="filter-option"><input type="radio" name="dur" id="d2"><label for="d2">Di bawah 10 jam</label></div>
+            <div class="filter-option"><input type="radio" name="dur" id="d3"><label for="d3">10–24 jam</label></div>
+            <div class="filter-option"><input type="radio" name="dur" id="d4"><label for="d4">24 jam ke atas</label></div>
+          </div>
+          <button class="btn btn-ghost w-full" style="justify-content:center;">Reset Filter</button>
+        </aside>
+
+        <!-- Program grid -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+            <span style="font-size:.875rem;color:var(--text-sm);">Menampilkan <strong style="color:var(--navy);">12</strong> dari 58 program</span>
+            <select class="form-control" style="width:auto;padding:8px 36px 8px 12px;font-size:.875rem;">
+              <option>Terpopuler</option>
+              <option>Terbaru</option>
+              <option>Nama A-Z</option>
+              <option>Durasi Terpendek</option>
+            </select>
+          </div>
+
+          <div class="programs-grid" id="programsGrid">
+            <div class="prog-card" data-cat="risk">
+              <div class="prog-card-header" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);">
+                <span class="prog-emoji">⚡</span>
+                <div class="prog-card-cat"><span class="badge badge-gold">Risk Management</span></div>
+              </div>
+              <div class="prog-card-body">
+                <h3 class="prog-card-title">Enterprise Risk Management (ERM) — Fundamental</h3>
+                <p class="prog-card-desc">Kerangka ERM berbasis COSO 2017 dan ISO 31000 untuk membangun sistem manajemen risiko yang efektif.</p>
+                <div class="prog-card-meta">
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>24 Jam</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>8 Modul</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>BUMN, Swasta</span>
+                </div>
+              </div>
+              <div class="prog-card-footer">
+                <span class="badge badge-info">Pemula</span>
+                <a href="program-detail.html" class="btn btn-primary btn-sm">Lihat Detail</a>
+              </div>
+            </div>
+
+            <div class="prog-card" data-cat="compliance">
+              <div class="prog-card-header" style="background:linear-gradient(135deg,var(--teal-lt),#A7F3D0);">
+                <span class="prog-emoji">✅</span>
+                <div class="prog-card-cat"><span class="badge badge-teal">Compliance</span></div>
+              </div>
+              <div class="prog-card-body">
+                <h3 class="prog-card-title">Kepatuhan Regulasi Perbankan & Keuangan</h3>
+                <p class="prog-card-desc">Regulasi OJK, BI, dan PPATK untuk industri perbankan dan keuangan di Indonesia secara komprehensif.</p>
+                <div class="prog-card-meta">
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>32 Jam</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>10 Modul</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Perbankan</span>
+                </div>
+              </div>
+              <div class="prog-card-footer">
+                <span class="badge badge-warning">Menengah</span>
+                <a href="program-detail.html" class="btn btn-primary btn-sm">Lihat Detail</a>
+              </div>
+            </div>
+
+            <div class="prog-card" data-cat="governance">
+              <div class="prog-card-header" style="background:linear-gradient(135deg,#EFF6FF,#BFDBFE);">
+                <span class="prog-emoji">🏛️</span>
+                <div class="prog-card-cat"><span class="badge badge-info">Governance</span></div>
+              </div>
+              <div class="prog-card-body">
+                <h3 class="prog-card-title">Tata Kelola Perusahaan yang Baik (GCG)</h3>
+                <p class="prog-card-desc">Prinsip GCG untuk direksi, komisaris, dan manajer dalam membangun tata kelola yang transparan dan akuntabel.</p>
+                <div class="prog-card-meta">
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>20 Jam</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>6 Modul</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Eksekutif</span>
+                </div>
+              </div>
+              <div class="prog-card-footer">
+                <span class="badge badge-success">Lanjutan</span>
+                <a href="program-detail.html" class="btn btn-primary btn-sm">Lihat Detail</a>
+              </div>
+            </div>
+
+            <div class="prog-card" data-cat="audit">
+              <div class="prog-card-header" style="background:linear-gradient(135deg,#F0FDF4,#BBF7D0);">
+                <span class="prog-emoji">🔍</span>
+                <div class="prog-card-cat"><span class="badge badge-success">Internal Audit</span></div>
+              </div>
+              <div class="prog-card-body">
+                <h3 class="prog-card-title">Internal Audit Fundamentals & CIA Preparation</h3>
+                <p class="prog-card-desc">Dasar-dasar internal audit dan persiapan ujian Certified Internal Auditor (CIA) berstandar IIA.</p>
+                <div class="prog-card-meta">
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>40 Jam</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>12 Modul</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Semua Sektor</span>
+                </div>
+              </div>
+              <div class="prog-card-footer">
+                <span class="badge badge-warning">Menengah</span>
+                <a href="program-detail.html" class="btn btn-primary btn-sm">Lihat Detail</a>
+              </div>
+            </div>
+
+            <div class="prog-card" data-cat="esg">
+              <div class="prog-card-header" style="background:linear-gradient(135deg,#ECFDF5,#A7F3D0);">
+                <span class="prog-emoji">🌱</span>
+                <div class="prog-card-cat"><span class="badge badge-teal">ESG / Sustainability</span></div>
+              </div>
+              <div class="prog-card-body">
+                <h3 class="prog-card-title">ESG Reporting & Sustainability Management</h3>
+                <p class="prog-card-desc">Penyusunan laporan ESG sesuai standar GRI, SASB, dan TCFD untuk perusahaan publik dan BUMN.</p>
+                <div class="prog-card-meta">
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>28 Jam</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>9 Modul</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Perusahaan Publik</span>
+                </div>
+              </div>
+              <div class="prog-card-footer">
+                <span class="badge badge-warning">Menengah</span>
+                <a href="program-detail.html" class="btn btn-primary btn-sm">Lihat Detail</a>
+              </div>
+            </div>
+
+            <div class="prog-card" data-cat="publik">
+              <div class="prog-card-header" style="background:linear-gradient(135deg,rgba(11,36,71,.06),rgba(25,55,109,.1));">
+                <span class="prog-emoji">🏛️</span>
+                <div class="prog-card-cat"><span class="badge badge-navy">Public Sector</span></div>
+              </div>
+              <div class="prog-card-body">
+                <h3 class="prog-card-title">Tata Kelola Sektor Publik & SPIP</h3>
+                <p class="prog-card-desc">Sistem Pengendalian Intern Pemerintah (SPIP) dan tata kelola keuangan daerah sesuai regulasi BPK dan BPKP.</p>
+                <div class="prog-card-meta">
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>16 Jam</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>6 Modul</span>
+                  <span class="prog-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>ASN / Pemerintah</span>
+                </div>
+              </div>
+              <div class="prog-card-footer">
+                <span class="badge badge-info">Pemula</span>
+                <a href="program-detail.html" class="btn btn-primary btn-sm">Lihat Detail</a>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:32px;">
+            <button class="btn btn-outline btn-lg" onclick="showToast('Memuat lebih banyak program...','info')">Muat Lebih Banyak Program</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER slim -->
+  <footer style="background:var(--navy-dk);padding:24px 0;margin-top:40px;">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <span style="font-size:.8125rem;color:rgba(255,255,255,.35);">© 2026 GRCC Academy</span>
+      <div style="display:flex;gap:16px;">
+        <a href="index.html" style="font-size:.8125rem;color:rgba(255,255,255,.4);">Beranda</a>
+        <a href="helpdesk.html" style="font-size:.8125rem;color:rgba(255,255,255,.4);">Bantuan</a>
+        <a href="login.html" style="font-size:.8125rem;color:var(--teal);">Masuk</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container"></div>
+  <script src="js/main.js"></script>
+  <script>
+    window.addEventListener('scroll', () => document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 20));
+    // Filter
+    document.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const cat = pill.getAttribute('data-cat');
+        document.querySelectorAll('.prog-card').forEach(card => {
+          card.style.display = (!cat || cat === 'all' || card.getAttribute('data-cat') === cat) ? '' : 'none';
+        });
+      });
+    });
+    // Search
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('.prog-card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+    function showToast(msg, type) {
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<span>${msg}</span>`;
+      document.querySelector('.toast-container').appendChild(t);
+      requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+      setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+    }
+  </script>
+</body>
+</html>

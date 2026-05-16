@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — GRCC Academy</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ─── Layout Variables ─────────────────────────────────── */
+    :root {
+      --side-w: 240px;
+      --topbar-h: 60px;
+    }
+
+    /* ─── Reset / Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); font-family: var(--font-b); }
+
+    /* ─── App Shell ────────────────────────────────────────── */
+    .admin-layout { display: flex; min-height: 100vh; }
+
+    /* ═══════════════════════════════════════════════════════ */
+    /*  SIDEBAR                                               */
+    /* ═══════════════════════════════════════════════════════ */
+    .admin-sidebar {
+      width: var(--side-w);
+      background: var(--navy-dk);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 50;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+    .admin-sidebar::-webkit-scrollbar { display: none; }
+
+    /* Brand / Logo */
+    .admin-sidebar-brand {
+      padding: 20px 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .admin-sidebar-brand img { height: 46px; width: auto; display: block; }
+
+    /* Nav container */
+    .admin-nav { flex: 1; padding: 14px 10px 10px; }
+
+    /* Group label */
+    .admin-nav-label {
+      font-size: .6rem;
+      font-weight: 800;
+      color: rgba(255,255,255,.25);
+      text-transform: uppercase;
+      letter-spacing: .13em;
+      padding: 10px 10px 5px;
+      margin-top: 4px;
+    }
+
+    /* Nav item */
+    .admin-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--r-md);
+      font-size: .8125rem;
+      font-weight: 500;
+      color: rgba(255,255,255,.5);
+      cursor: pointer;
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+      text-decoration: none;
+      margin-bottom: 1px;
+      position: relative;
+    }
+    .admin-link:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.9); }
+    .admin-link.active {
+      background: var(--teal);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(20,184,166,.35);
+    }
+    .admin-link svg { flex-shrink: 0; opacity: .85; }
+    .admin-link.active svg { opacity: 1; }
+
+    /* Notification dot on nav item */
+    .badge-dot {
+      margin-left: auto;
+      min-width: 18px;
+      height: 18px;
+      background: var(--danger);
+      border-radius: 99px;
+      font-size: .6rem;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    /* User block */
+    .admin-user {
+      padding: 14px 12px 12px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+    .admin-user-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-avatar-lg {
+      width: 36px; height: 36px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 800; color: var(--navy-dk);
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.15);
+    }
+    .admin-user-name { font-size: .8125rem; font-weight: 700; color: white; line-height: 1.25; }
+    .admin-user-role { font-size: .68rem; color: rgba(255,255,255,.38); margin-top: 1px; }
+    .admin-logout {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 10px;
+      padding: 7px 10px;
+      border-radius: var(--r-md);
+      font-size: .7875rem;
+      font-weight: 500;
+      color: rgba(255,255,255,.38);
+      text-decoration: none;
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+      cursor: pointer;
+    }
+    .admin-logout:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); }
+
+    /* ═══════════════════════════════════════════════════════ */
+    /*  MAIN AREA                                             */
+    /* ═══════════════════════════════════════════════════════ */
+    .admin-main {
+      margin-left: var(--side-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+    .admin-topbar {
+      height: var(--topbar-h);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .admin-topbar-title {
+      font-family: var(--font-h);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -.01em;
+    }
+    .admin-topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .admin-topbar-notif { position: relative; display: flex; align-items: center; cursor: pointer; }
+    .admin-topbar-notif-dot {
+      position: absolute; top: -2px; right: -2px;
+      width: 8px; height: 8px;
+      background: var(--danger); border-radius: 50%;
+      border: 2px solid white;
+    }
+    .admin-topbar-avatar {
+      width: 32px; height: 32px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 800; color: var(--navy-dk);
+      cursor: pointer;
+    }
+    #adminToggle {
+      background: none; border: none; cursor: pointer;
+      padding: 4px; display: none; color: var(--text-md);
+      border-radius: var(--r);
+      transition: background var(--dur);
+    }
+    #adminToggle:hover { background: var(--bg-2); }
+
+    /* Page content */
+    .admin-content { padding: 28px 32px 56px; flex: 1; }
+
+    /* Section visibility */
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+
+    /* ─── Section Header ───────────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .section-header-left { display: flex; align-items: center; gap: 14px; }
+    .section-icon-box {
+      width: 44px; height: 44px;
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-title { font-size: 1.1875rem; font-weight: 800; color: var(--navy); font-family: var(--font-h); line-height: 1.25; }
+    .section-sub { font-size: .8125rem; color: var(--text-sm); margin-top: 3px; }
+    .section-header-right { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    /* ═══════════════════════════════════════════════════════ */
+    /*  STAT CARDS                                            */
+    /* ═══════════════════════════════════════════════════════ */
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px 20px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .stat-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+    .stat-card-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+    .stat-card-body { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .stat-card-info { flex: 1; min-width: 0; }
+    .stat-card-val { font-size: 1.875rem; font-weight: 800; font-family: var(--font-h); color: var(--navy); letter-spacing: -.02em; line-height: 1; }
+    .stat-card-label { font-size: .8rem; color: var(--text-sm); margin-top: 5px; font-weight: 500; }
+    .stat-card-change {
+      font-size: .75rem;
+      font-weight: 600;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-card-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════ */
+    /*  CHART + TOP-PROGRAMS ROW                              */
+    /* ═══════════════════════════════════════════════════════ */
+    .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px 22px;
+    }
+    .panel-title { font-weight: 700; font-size: .9375rem; color: var(--navy); margin-bottom: 3px; font-family: var(--font-h); }
+    .panel-sub { font-size: .7875rem; color: var(--text-xs); margin-bottom: 18px; }
+
+    /* Bar chart */
+    .bar-chart-wrap {
+      position: relative;
+    }
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 148px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0;
+    }
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+    }
+    .bar-val {
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--text-sm);
+      margin-bottom: 4px;
+      position: absolute;
+      bottom: calc(var(--bar-h) + 2px);
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .bar-fill {
+      width: 100%;
+      border-radius: 5px 5px 0 0;
+      transition: opacity .2s;
+      position: relative;
+    }
+    .bar-fill:hover { opacity: .82; }
+    .bar-label {
+      font-size: .7rem;
+      color: var(--text-xs);
+      margin-top: 7px;
+      font-weight: 500;
+    }
+    .bar-label.current { color: var(--navy); font-weight: 700; }
+
+    /* Top programs */
+    .prog-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 13px;
+    }
+    .prog-row:last-child { margin-bottom: 0; }
+    .prog-rank {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--bg-2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .68rem; font-weight: 800; color: var(--text-sm);
+      flex-shrink: 0;
+    }
+    .prog-info { flex: 1; min-width: 0; }
+    .prog-name { font-size: .8125rem; font-weight: 600; color: var(--navy); margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prog-bar-track { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .prog-bar-fill { height: 100%; border-radius: 99px; }
+    .prog-count { font-size: .75rem; font-weight: 600; color: var(--text-sm); white-space: nowrap; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════ */
+    /*  TABLES                                                */
+    /* ═══════════════════════════════════════════════════════ */
+    .table-panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+    .table-panel-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .table-panel-head-title { font-weight: 700; font-size: .9375rem; color: var(--navy); font-family: var(--font-h); }
+    .table-panel-head-sub { font-size: .7875rem; color: var(--text-xs); margin-top: 2px; }
+
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      padding: 10px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+    .admin-table td {
+      padding: 12px 16px;
+      font-size: .8625rem;
+      color: var(--text-md);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: #F8FAFF; }
+    .td-primary { font-weight: 600; color: var(--navy) !important; }
+
+    /* Avatar circle for table rows */
+    .row-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 700;
+      flex-shrink: 0;
+      letter-spacing: -.01em;
+    }
+    .td-name-cell { display: flex; align-items: center; gap: 10px; }
+    .td-name-info .td-name { font-weight: 600; color: var(--navy); line-height: 1.35; }
+    .td-name-info .td-email { font-size: .75rem; color: var(--text-xs); margin-top: 1px; }
+
+    /* Progress bar inline */
+    .prog-mini { height: 6px; background: var(--border-lt, #e5e7eb); border-radius: 99px; overflow: hidden; width: 90px; }
+    .prog-mini-fill { height: 100%; background: var(--teal); border-radius: 99px; }
+
+    /* ─── Toolbar (search / filter) ────────────────────────── */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .toolbar-search {
+      position: relative;
+    }
+    .toolbar-search svg {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .toolbar-search input {
+      padding: 8px 12px 8px 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      font-size: .8375rem;
+      background: var(--white);
+      color: var(--text);
+      width: 220px;
+      outline: none;
+      transition: border-color var(--dur);
+    }
+    .toolbar-search input:focus { border-color: var(--teal); }
+    .toolbar select {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      font-size: .8375rem;
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* ─── Laporan cards ─────────────────────────────────────── */
+    .laporan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(256px, 1fr)); gap: 18px; }
+    .laporan-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 22px 20px;
+      transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .laporan-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+    .laporan-card-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .laporan-card-title { font-weight: 700; color: var(--navy); margin-bottom: 5px; font-size: .9375rem; }
+    .laporan-card-desc { font-size: .8rem; color: var(--text-xs); margin-bottom: 18px; line-height: 1.55; }
+    .laporan-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* Soal type badge stats */
+    .soal-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 860px) {
+      .dash-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 960px) {
+      .admin-sidebar { transform: translateX(-100%); transition: transform .3s var(--ease); box-shadow: var(--sh-lg); }
+      .admin-sidebar.open { transform: translateX(0); }
+      .admin-main { margin-left: 0; }
+      #adminToggle { display: block !important; }
+      .admin-content { padding: 20px 16px 48px; }
+    }
+    @media (max-width: 640px) {
+      .stat-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .stat-card-val { font-size: 1.5rem; }
+    }
+    @media (max-width: 420px) {
+      .stat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  SIDEBAR                                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <aside class="admin-sidebar" id="adminSidebar">
+
+    <!-- Logo -->
+    <div class="admin-sidebar-brand">
+      <img src="assets/grcc-logo.svg" alt="GRCC Logo">
+    </div>
+
+    <!-- Navigation -->
+    <nav class="admin-nav">
+
+      <div class="admin-nav-label">Utama</div>
+
+      <a class="admin-link active" onclick="showSection('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+
+      <a class="admin-link" onclick="showSection('peserta')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Data Peserta
+        <span class="badge-dot">3</span>
+      </a>
+
+      <a class="admin-link" onclick="showSection('program')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Program
+      </a>
+
+      <a class="admin-link" onclick="showSection('modul')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Modul &amp; Materi
+      </a>
+
+      <a class="admin-link" onclick="showSection('soal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Bank Soal
+      </a>
+
+      <div class="admin-nav-label" style="margin-top:10px;">Monitoring</div>
+
+      <a class="admin-link" onclick="showSection('progress')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Progress Peserta
+      </a>
+
+      <a class="admin-link" onclick="showSection('nilai')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Nilai &amp; Kelulusan
+      </a>
+
+      <a class="admin-link" onclick="showSection('sertifikat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Sertifikat
+      </a>
+
+      <div class="admin-nav-label" style="margin-top:10px;">Laporan</div>
+
+      <a class="admin-link" onclick="showSection('laporan')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Laporan Pembelajaran
+      </a>
+
+      <a class="admin-link" href="index.html" style="margin-top:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Lihat Website
+      </a>
+    </nav>
+
+    <!-- User block -->
+    <div class="admin-user">
+      <div class="admin-user-inner">
+        <div class="admin-avatar-lg">HK</div>
+        <div>
+          <div class="admin-user-name">Dr. Hendri K.</div>
+          <div class="admin-user-role">Super Admin</div>
+        </div>
+      </div>
+      <a class="admin-logout" href="login.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Keluar
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  MAIN                                                  -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="admin-main">
+
+    <!-- Top bar -->
+    <header class="admin-topbar">
+      <button id="adminToggle" onclick="document.getElementById('adminSidebar').classList.toggle('open')" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+
+      <div id="admin-page-title" class="admin-topbar-title">Dashboard Admin</div>
+
+      <div class="admin-topbar-actions">
+        <button onclick="showToast('Laporan sedang diunduh...','info')" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Ekspor
+        </button>
+        <div class="admin-topbar-notif">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-sm)" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="admin-topbar-notif-dot"></span>
+        </div>
+        <div class="admin-topbar-avatar">HK</div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <div class="admin-content">
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  DASHBOARD                                         -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-dashboard" class="admin-section active">
+
+        <!-- Stat Cards -->
+        <div class="stat-grid">
+
+          <!-- Peserta -->
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--teal);"></div>
+            <div class="stat-card-body">
+              <div class="stat-card-info">
+                <div class="stat-card-val">1,284</div>
+                <div class="stat-card-label">Total Peserta</div>
+                <div class="stat-card-change" style="color:var(--teal);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="18 15 12 9 6 15"/></svg>
+                  +42 bulan ini
+                </div>
+              </div>
+              <div class="stat-card-icon" style="background:var(--teal-lt);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" width="22" height="22"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Program Aktif -->
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:#6366F1;"></div>
+            <div class="stat-card-body">
+              <div class="stat-card-info">
+                <div class="stat-card-val">16</div>
+                <div class="stat-card-label">Program Aktif</div>
+                <div class="stat-card-change" style="color:#6366F1;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="18 15 12 9 6 15"/></svg>
+                  +2 program baru
+                </div>
+              </div>
+              <div class="stat-card-icon" style="background:#EEF2FF;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" width="22" height="22"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sertifikat -->
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--gold);"></div>
+            <div class="stat-card-body">
+              <div class="stat-card-info">
+                <div class="stat-card-val">847</div>
+                <div class="stat-card-label">Sertifikat Diterbitkan</div>
+                <div class="stat-card-change" style="color:var(--gold);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="18 15 12 9 6 15"/></svg>
+                  +28 minggu ini
+                </div>
+              </div>
+              <div class="stat-card-icon" style="background:#FFFBEB;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kelulusan -->
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--success);"></div>
+            <div class="stat-card-body">
+              <div class="stat-card-info">
+                <div class="stat-card-val">91.4%</div>
+                <div class="stat-card-label">Tingkat Kelulusan</div>
+                <div class="stat-card-change" style="color:var(--success);">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="18 15 12 9 6 15"/></svg>
+                  +2.1% vs bulan lalu
+                </div>
+              </div>
+              <div class="stat-card-icon" style="background:var(--success-bg);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" width="22" height="22"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /stat-grid -->
+
+        <!-- Chart + Top Programs -->
+        <div class="dash-row">
+
+          <!-- Bar chart -->
+          <div class="panel">
+            <div class="panel-title">Pendaftaran Peserta</div>
+            <div class="panel-sub">6 bulan terakhir</div>
+            <div class="bar-chart-wrap">
+              <div class="bar-chart">
+                <!-- Des: 60% of max (189) ≈ 114 -->
+                <div class="bar-col">
+                  <span class="bar-val" style="bottom:calc(60% + 6px);">114</span>
+                  <div class="bar-fill" style="height:60%;background:var(--teal);"></div>
+                  <span class="bar-label">Des</span>
+                </div>
+                <!-- Jan: 75% ≈ 142 -->
+                <div class="bar-col">
+                  <span class="bar-val" style="bottom:calc(75% + 6px);">142</span>
+                  <div class="bar-fill" style="height:75%;background:var(--teal);"></div>
+                  <span class="bar-label">Jan</span>
+                </div>
+                <!-- Feb: 55% ≈ 104 -->
+                <div class="bar-col">
+                  <span class="bar-val" style="bottom:calc(55% + 6px);">104</span>
+                  <div class="bar-fill" style="height:55%;background:var(--teal);"></div>
+                  <span class="bar-label">Feb</span>
+                </div>
+                <!-- Mar: 85% ≈ 161 -->
+                <div class="bar-col">
+                  <span class="bar-val" style="bottom:calc(85% + 6px);">161</span>
+                  <div class="bar-fill" style="height:85%;background:var(--teal);"></div>
+                  <span class="bar-label">Mar</span>
+                </div>
+                <!-- Apr: 70% ≈ 133 -->
+                <div class="bar-col">
+                  <span class="bar-val" style="bottom:calc(70% + 6px);">133</span>
+                  <div class="bar-fill" style="height:70%;background:var(--teal);"></div>
+                  <span class="bar-label">Apr</span>
+                </div>
+                <!-- Mei: 92% = 189 (current) -->
+                <div class="bar-col">
+                  <span class="bar-val" style="bottom:calc(92% + 6px);color:var(--navy);font-weight:800;">189</span>
+                  <div class="bar-fill" style="height:92%;background:var(--navy);"></div>
+                  <span class="bar-label current">Mei</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Programs -->
+          <div class="panel">
+            <div class="panel-title">Program Terpopuler</div>
+            <div class="panel-sub">Berdasarkan jumlah peserta aktif</div>
+
+            <div class="prog-row">
+              <div class="prog-rank" style="background:rgba(20,184,166,.12);color:var(--teal);">1</div>
+              <div class="prog-info">
+                <div class="prog-name">ERM Fundamental</div>
+                <div class="prog-bar-track"><div class="prog-bar-fill" style="width:100%;background:var(--teal);"></div></div>
+              </div>
+              <div class="prog-count">428</div>
+            </div>
+
+            <div class="prog-row">
+              <div class="prog-rank" style="background:rgba(15,23,42,.08);color:var(--navy);">2</div>
+              <div class="prog-info">
+                <div class="prog-name">Internal Audit</div>
+                <div class="prog-bar-track"><div class="prog-bar-fill" style="width:73%;background:var(--navy);"></div></div>
+              </div>
+              <div class="prog-count">312</div>
+            </div>
+
+            <div class="prog-row">
+              <div class="prog-rank" style="background:#FFFBEB;color:var(--gold);">3</div>
+              <div class="prog-info">
+                <div class="prog-name">Compliance Management</div>
+                <div class="prog-bar-track"><div class="prog-bar-fill" style="width:62%;background:var(--gold);"></div></div>
+              </div>
+              <div class="prog-count">264</div>
+            </div>
+
+            <div class="prog-row">
+              <div class="prog-rank">4</div>
+              <div class="prog-info">
+                <div class="prog-name">GRC for Government</div>
+                <div class="prog-bar-track"><div class="prog-bar-fill" style="width:46%;background:#6366F1;"></div></div>
+              </div>
+              <div class="prog-count">198</div>
+            </div>
+
+            <div class="prog-row">
+              <div class="prog-rank">5</div>
+              <div class="prog-info">
+                <div class="prog-name">ESG &amp; Keberlanjutan</div>
+                <div class="prog-bar-track"><div class="prog-bar-fill" style="width:19%;background:#F59E0B;"></div></div>
+              </div>
+              <div class="prog-count">82</div>
+            </div>
+          </div>
+
+        </div><!-- /dash-row -->
+
+        <!-- Recent Registrations -->
+        <div class="table-panel">
+          <div class="table-panel-head">
+            <div>
+              <div class="table-panel-head-title">Pendaftaran Terbaru</div>
+              <div class="table-panel-head-sub">3 peserta baru menunggu verifikasi</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="showSection('peserta')">Kelola Semua →</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Institusi</th>
+                <th>Program</th>
+                <th>Tgl Daftar</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#CCFBF1;color:#0F766E;">SR</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Siti Rahmawati, S.H.</div>
+                      <div class="td-email">siti.r@kemenkeu.go.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>Kementerian Keuangan</td>
+                <td>ERM Fundamental</td>
+                <td>07 Mei 2026</td>
+                <td><span class="badge badge-gold">Menunggu</span></td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-outline btn-sm" onclick="approveUser('Siti Rahmawati')">Setujui</button>
+                    <button class="btn btn-ghost btn-sm">Tolak</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#E0E7FF;color:#4338CA;">BS</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Budi Santoso, M.M.</div>
+                      <div class="td-email">bsantoso@pertamina.co.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>PT Pertamina (Persero)</td>
+                <td>Internal Audit</td>
+                <td>06 Mei 2026</td>
+                <td><span class="badge badge-gold">Menunggu</span></td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-outline btn-sm" onclick="approveUser('Budi Santoso')">Setujui</button>
+                    <button class="btn btn-ghost btn-sm">Tolak</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#FCE7F3;color:#BE185D;">DA</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Dewi Anggraini</div>
+                      <div class="td-email">dewi.a@bri.co.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>PT Bank BRI</td>
+                <td>Compliance Management</td>
+                <td>05 Mei 2026</td>
+                <td><span class="badge badge-gold">Menunggu</span></td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-outline btn-sm" onclick="approveUser('Dewi Anggraini')">Setujui</button>
+                    <button class="btn btn-ghost btn-sm">Tolak</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#D1FAE5;color:#065F46;">AF</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Ahmad Fauzi, S.E.</div>
+                      <div class="td-email">a.fauzi@gmail.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>Individual</td>
+                <td>ERM Fundamental</td>
+                <td>01 Mar 2026</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><button class="btn btn-ghost btn-sm">Detail</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#FEF3C7;color:#92400E;">RP</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Reza Putra, S.T.</div>
+                      <div class="td-email">reza.p@pln.co.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>PT PLN (Persero)</td>
+                <td>GRC for Government</td>
+                <td>28 Feb 2026</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><button class="btn btn-ghost btn-sm">Detail</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /section-dashboard -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  PESERTA                                           -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-peserta" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:var(--teal-lt);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" width="22" height="22"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Data Peserta</div>
+              <div class="section-sub">1.284 peserta terdaftar · 3 menunggu verifikasi</div>
+            </div>
+          </div>
+          <div class="section-header-right">
+            <div class="toolbar">
+              <div class="toolbar-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-xs)" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Cari peserta...">
+              </div>
+              <select>
+                <option>Semua Status</option>
+                <option>Aktif</option>
+                <option>Menunggu</option>
+                <option>Selesai</option>
+                <option>Ditolak</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="showToast('Tambah peserta manual','info')" style="display:flex;align-items:center;gap:5px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Tambah Peserta
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-panel">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nama Peserta</th>
+                <th>Institusi</th>
+                <th>Program</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th>Bergabung</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--text-xs);font-size:.8rem;">1</td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#CCFBF1;color:#0F766E;">SR</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Siti Rahmawati, S.H.</div>
+                      <div class="td-email">siti.r@kemenkeu.go.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>Kemenkeu</td>
+                <td>ERM Fundamental</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini"><div class="prog-mini-fill" style="width:0%;"></div></div>
+                    <span style="font-size:.775rem;color:var(--text-xs);">0%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-gold">Menunggu</span></td>
+                <td style="font-size:.8rem;color:var(--text-xs);">07 Mei 2026</td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-outline btn-sm" onclick="approveUser('Siti')">✓</button>
+                    <button class="btn btn-ghost btn-sm">✕</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-xs);font-size:.8rem;">2</td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#E0E7FF;color:#4338CA;">BS</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Budi Santoso, M.M.</div>
+                      <div class="td-email">bsantoso@pertamina.co.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>PT Pertamina</td>
+                <td>Internal Audit</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini"><div class="prog-mini-fill" style="width:0%;"></div></div>
+                    <span style="font-size:.775rem;color:var(--text-xs);">0%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-gold">Menunggu</span></td>
+                <td style="font-size:.8rem;color:var(--text-xs);">06 Mei 2026</td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-outline btn-sm" onclick="approveUser('Budi')">✓</button>
+                    <button class="btn btn-ghost btn-sm">✕</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-xs);font-size:.8rem;">3</td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#D1FAE5;color:#065F46;">AF</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Ahmad Fauzi, S.E.</div>
+                      <div class="td-email">a.fauzi@gmail.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>Individual</td>
+                <td>ERM Fundamental</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini"><div class="prog-mini-fill" style="width:68%;"></div></div>
+                    <span style="font-size:.775rem;">68%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td style="font-size:.8rem;color:var(--text-xs);">01 Mar 2026</td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm">Detail</button>
+                    <button class="btn btn-ghost btn-sm">Edit</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-xs);font-size:.8rem;">4</td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#FEF3C7;color:#92400E;">RP</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Reza Putra, S.T.</div>
+                      <div class="td-email">reza.p@pln.co.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>PT PLN</td>
+                <td>GRC for Gov.</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini"><div class="prog-mini-fill" style="width:45%;background:var(--gold);"></div></div>
+                    <span style="font-size:.775rem;">45%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td style="font-size:.8rem;color:var(--text-xs);">28 Feb 2026</td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm">Detail</button>
+                    <button class="btn btn-ghost btn-sm">Edit</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-xs);font-size:.8rem;">5</td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#F3E8FF;color:#7E22CE;">MK</div>
+                    <div class="td-name-info">
+                      <div class="td-name">Maya Kusuma, M.Ak.</div>
+                      <div class="td-email">m.kusuma@bpk.go.id</div>
+                    </div>
+                  </div>
+                </td>
+                <td>BPK RI</td>
+                <td>ERM Fundamental</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini"><div class="prog-mini-fill" style="width:100%;"></div></div>
+                    <span style="font-size:.775rem;">100%</span>
+                  </div>
+                </td>
+                <td><span class="badge" style="background:#E0F2FE;color:#0284C7;">Lulus</span></td>
+                <td style="font-size:.8rem;color:var(--text-xs);">15 Jan 2026</td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm">Detail</button>
+                    <button class="btn btn-outline btn-sm" onclick="issueCert('Maya Kusuma')">Sertifikat</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-peserta -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  PROGRAM                                           -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-program" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#EEF2FF;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" width="22" height="22"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Manajemen Program</div>
+              <div class="section-sub">16 program aktif · 2 draft · 3 arsip</div>
+            </div>
+          </div>
+          <div class="section-header-right">
+            <button class="btn btn-primary btn-sm" onclick="showToast('Membuka form program baru','info')" style="display:flex;align-items:center;gap:5px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Program
+            </button>
+          </div>
+        </div>
+
+        <div class="table-panel">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nama Program</th>
+                <th>Kategori</th>
+                <th>Modul</th>
+                <th>Peserta</th>
+                <th>Lulus</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-primary">ERM Fundamental</td>
+                <td>Risk Management</td><td>8 modul</td><td>428</td><td>389 (91%)</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Modul</button><button class="btn btn-ghost btn-sm">Soal</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">Internal Audit Fundamentals</td>
+                <td>Audit</td><td>6 modul</td><td>312</td><td>278 (89%)</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Modul</button><button class="btn btn-ghost btn-sm">Soal</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">Compliance Management</td>
+                <td>Compliance</td><td>7 modul</td><td>264</td><td>231 (87%)</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Modul</button><button class="btn btn-ghost btn-sm">Soal</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">GRC for Government</td>
+                <td>Governance</td><td>5 modul</td><td>198</td><td>167 (84%)</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Modul</button><button class="btn btn-ghost btn-sm">Soal</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">ESG &amp; Keberlanjutan</td>
+                <td>ESG</td><td>4 modul</td><td>82</td><td>64 (78%)</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Modul</button><button class="btn btn-ghost btn-sm">Soal</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">GRC Advanced — COSO 2017</td>
+                <td>Risk Management</td><td>0 modul</td><td>0</td><td>—</td>
+                <td><span class="badge badge-gold">Draft</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Publish</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-program -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  MODUL                                             -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-modul" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#F0FDF4;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" width="22" height="22"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Modul &amp; Materi</div>
+              <div class="section-sub">Kelola modul pembelajaran dan unggah file materi</div>
+            </div>
+          </div>
+          <div class="section-header-right">
+            <button class="btn btn-outline btn-sm" onclick="showToast('Membuka panel unggah file','info')" style="display:flex;align-items:center;gap:5px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Unggah Materi
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="showToast('Membuka form modul baru','info')" style="display:flex;align-items:center;gap:5px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Modul
+            </button>
+          </div>
+        </div>
+
+        <div class="table-panel">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nama Modul</th>
+                <th>Program</th>
+                <th>Urutan</th>
+                <th>File Lampiran</th>
+                <th>Selesai oleh</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-primary">Pengantar GRC &amp; Kerangka Kerja</td>
+                <td>ERM Fundamental</td><td>Modul 1</td><td>PDF, PPTX</td><td>428 peserta</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">File</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">Corporate Governance</td>
+                <td>ERM Fundamental</td><td>Modul 2</td><td>PDF, PPTX</td><td>406 peserta</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">File</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">Identifikasi &amp; Penilaian Risiko</td>
+                <td>ERM Fundamental</td><td>Modul 3</td><td>PDF, XLSX</td><td>394 peserta</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">File</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">Risk Appetite &amp; Tolerance</td>
+                <td>ERM Fundamental</td><td>Modul 4</td><td>PDF</td><td>378 peserta</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">File</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">Risk Treatment &amp; Mitigasi</td>
+                <td>ERM Fundamental</td><td>Modul 6</td><td>PDF, PPTX</td><td>291 peserta</td>
+                <td><span class="badge badge-success">Aktif</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">File</button></div></td>
+              </tr>
+              <tr>
+                <td class="td-primary">Studi Kasus ERM Indonesia</td>
+                <td>ERM Fundamental</td><td>Modul 8</td><td>—</td><td>0 peserta</td>
+                <td><span class="badge badge-gold">Draft</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="showToast('Unggah file modul 8','info')">Unggah File</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-modul -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  BANK SOAL                                         -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-soal" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#FFF7ED;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Bank Soal</div>
+              <div class="section-sub">Kelola soal untuk Quiz, Pre-Test, Post-Test, dan Final Exam</div>
+            </div>
+          </div>
+          <div class="section-header-right">
+            <button class="btn btn-primary btn-sm" onclick="showToast('Membuka form tambah soal baru','info')" style="display:flex;align-items:center;gap:5px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Soal
+            </button>
+          </div>
+        </div>
+
+        <div class="soal-stats">
+          <span class="badge badge-success" style="padding:6px 14px;font-size:.8rem;">Quiz: 40 soal</span>
+          <span class="badge badge-teal" style="padding:6px 14px;font-size:.8rem;">Pre-Test: 20 soal</span>
+          <span class="badge badge-gold" style="padding:6px 14px;font-size:.8rem;">Post-Test: 30 soal</span>
+          <span class="badge" style="padding:6px 14px;font-size:.8rem;background:var(--navy);color:white;">Final Exam: 50 soal</span>
+        </div>
+
+        <div class="table-panel">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Soal</th>
+                <th>Tipe</th>
+                <th>Ujian</th>
+                <th>Modul</th>
+                <th>Tingkat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;font-size:.8rem;color:var(--navy);">Q-001</td>
+                <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Perusahaan X mengidentifikasi risiko dengan Risk Score = 16...</td>
+                <td><span class="badge badge-teal" style="font-size:.7rem;">Pilihan Ganda</span></td>
+                <td>Quiz M6</td><td>Modul 6</td>
+                <td><span style="color:var(--gold);font-weight:600;font-size:.8rem;">Sedang</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Hapus</button></div></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:.8rem;color:var(--navy);">Q-002</td>
+                <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Manakah pernyataan yang BENAR mengenai Residual Risk?</td>
+                <td><span class="badge badge-teal" style="font-size:.7rem;">Pilihan Ganda</span></td>
+                <td>Quiz M6</td><td>Modul 6</td>
+                <td><span style="color:var(--success);font-weight:600;font-size:.8rem;">Mudah</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Hapus</button></div></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:.8rem;color:var(--navy);">Q-003</td>
+                <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Pemilihan risk treatment harus mempertimbangkan cost-benefit...</td>
+                <td><span class="badge badge-gold" style="font-size:.7rem;">Benar/Salah</span></td>
+                <td>Quiz M6</td><td>Modul 6</td>
+                <td><span style="color:var(--success);font-weight:600;font-size:.8rem;">Mudah</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Hapus</button></div></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:.8rem;color:var(--navy);">Q-004</td>
+                <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">PT Bank Nusantara membeli asuransi untuk melindungi gedung...</td>
+                <td><span class="badge badge-teal" style="font-size:.7rem;">Pilihan Ganda</span></td>
+                <td>Post-Test</td><td>Modul 6</td>
+                <td><span style="color:var(--gold);font-weight:600;font-size:.8rem;">Sedang</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Hapus</button></div></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:.8rem;color:var(--navy);">Q-005</td>
+                <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">[STUDI KASUS] PT Maju Sejahtera rencana ekspansi ke negara...</td>
+                <td><span class="badge" style="font-size:.7rem;background:#EEF2FF;color:#6366F1;">Studi Kasus</span></td>
+                <td>Final Exam</td><td>Modul 6-8</td>
+                <td><span style="color:var(--danger);font-weight:600;font-size:.8rem;">Sulit</span></td>
+                <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Hapus</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-soal -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  PROGRESS                                          -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-progress" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#F0FDF4;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" width="22" height="22"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Progress Peserta</div>
+              <div class="section-sub">Pantau progress belajar seluruh peserta secara real-time</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-panel">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Peserta</th>
+                <th>Program</th>
+                <th>Modul Selesai</th>
+                <th>Progress</th>
+                <th>Quiz</th>
+                <th>Pre-Test</th>
+                <th>Post-Test</th>
+                <th>Final Exam</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#D1FAE5;color:#065F46;">AF</div>
+                    <span class="td-primary">Ahmad Fauzi</span>
+                  </div>
+                </td>
+                <td>ERM Fundamental</td><td>5/8</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini" style="width:80px;"><div class="prog-mini-fill" style="width:68%;"></div></div>
+                    <span style="font-size:.8rem;">68%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-success">Lulus 80</span></td>
+                <td><span class="badge badge-teal">60</span></td>
+                <td><span class="badge badge-gold">Belum</span></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#F3E8FF;color:#7E22CE;">MK</div>
+                    <span class="td-primary">Maya Kusuma</span>
+                  </div>
+                </td>
+                <td>ERM Fundamental</td><td>8/8</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini" style="width:80px;"><div class="prog-mini-fill" style="width:100%;"></div></div>
+                    <span style="font-size:.8rem;">100%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-success">Lulus 95</span></td>
+                <td><span class="badge badge-teal">72</span></td>
+                <td><span class="badge badge-success">Lulus 88</span></td>
+                <td><span class="badge badge-success">Lulus 91</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#FEF3C7;color:#92400E;">RP</div>
+                    <span class="td-primary">Reza Putra</span>
+                  </div>
+                </td>
+                <td>GRC for Gov.</td><td>2/5</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini" style="width:80px;"><div class="prog-mini-fill" style="width:45%;background:var(--gold);"></div></div>
+                    <span style="font-size:.8rem;">45%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-gold">Belum</span></td>
+                <td><span class="badge badge-teal">55</span></td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#DBEAFE;color:#1D4ED8;">HW</div>
+                    <span class="td-primary">Hendra Wijaya</span>
+                  </div>
+                </td>
+                <td>Internal Audit</td><td>6/6</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="prog-mini" style="width:80px;"><div class="prog-mini-fill" style="width:100%;"></div></div>
+                    <span style="font-size:.8rem;">100%</span>
+                  </div>
+                </td>
+                <td><span class="badge badge-success">Lulus 85</span></td>
+                <td><span class="badge badge-teal">68</span></td>
+                <td><span class="badge badge-success">Lulus 82</span></td>
+                <td><span class="badge badge-danger">Gagal 58</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-progress -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  NILAI                                             -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-nilai" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#FEF2F2;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" width="22" height="22"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Nilai &amp; Kelulusan</div>
+              <div class="section-sub">Rekap nilai ujian dan status kelulusan peserta</div>
+            </div>
+          </div>
+          <div class="section-header-right">
+            <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh rekap nilai CSV','info')" style="display:flex;align-items:center;gap:5px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Unduh Rekap
+            </button>
+          </div>
+        </div>
+
+        <div class="table-panel">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Peserta</th>
+                <th>Program</th>
+                <th>Pre-Test</th>
+                <th>Post-Test</th>
+                <th>Final Exam</th>
+                <th>Nilai Akhir</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#F3E8FF;color:#7E22CE;">MK</div>
+                    <span class="td-primary">Maya Kusuma</span>
+                  </div>
+                </td>
+                <td>ERM Fundamental</td><td>72</td><td>88</td><td>91</td>
+                <td><strong style="color:var(--teal);font-size:.95rem;">91</strong></td>
+                <td><span class="badge badge-success">LULUS</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="issueCert('Maya Kusuma')">Terbitkan Sertifikat</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#D1FAE5;color:#065F46;">AF</div>
+                    <span class="td-primary">Ahmad Fauzi</span>
+                  </div>
+                </td>
+                <td>ERM Fundamental</td><td>60</td><td>—</td><td>—</td>
+                <td>—</td>
+                <td><span class="badge badge-gold">Sedang Berjalan</span></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#DBEAFE;color:#1D4ED8;">HW</div>
+                    <span class="td-primary">Hendra Wijaya</span>
+                  </div>
+                </td>
+                <td>Internal Audit</td><td>68</td><td>82</td><td>58</td>
+                <td><strong style="color:var(--danger);font-size:.95rem;">58</strong></td>
+                <td><span class="badge badge-danger">TIDAK LULUS</span></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Izin ujian ulang diberikan','success')">Izin Ujian Ulang</button></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#FEF3C7;color:#92400E;">RP</div>
+                    <span class="td-primary">Reza Putra</span>
+                  </div>
+                </td>
+                <td>GRC for Gov.</td><td>55</td><td>—</td><td>—</td>
+                <td>—</td>
+                <td><span class="badge badge-gold">Sedang Berjalan</span></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#FCE7F3;color:#BE185D;">SD</div>
+                    <span class="td-primary">Sari Dewi</span>
+                  </div>
+                </td>
+                <td>Compliance Mgmt</td><td>74</td><td>85</td><td>78</td>
+                <td><strong style="color:var(--teal);font-size:.95rem;">78</strong></td>
+                <td><span class="badge badge-success">LULUS</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="issueCert('Sari Dewi')">Terbitkan Sertifikat</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-nilai -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  SERTIFIKAT                                        -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-sertifikat" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#FFFBEB;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" width="22" height="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Manajemen Sertifikat</div>
+              <div class="section-sub">847 sertifikat diterbitkan · 2 menunggu penerbitan</div>
+            </div>
+          </div>
+          <div class="section-header-right">
+            <button class="btn btn-primary btn-sm" onclick="showToast('Menerbitkan batch sertifikat','info')">Terbitkan Batch</button>
+          </div>
+        </div>
+
+        <div class="table-panel">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>No. Sertifikat</th>
+                <th>Nama Peserta</th>
+                <th>Program</th>
+                <th>Nilai</th>
+                <th>Tanggal Terbit</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code style="font-size:.78rem;color:var(--navy);background:var(--bg);padding:2px 6px;border-radius:4px;">GRCC/2026/ERM/001248</code></td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#D1FAE5;color:#065F46;">AF</div>
+                    <span class="td-primary">Ahmad Fauzi, S.E.</span>
+                  </div>
+                </td>
+                <td>ERM Fundamental</td>
+                <td><strong style="color:var(--teal);">92</strong></td>
+                <td>28 Mar 2026</td>
+                <td><span class="badge badge-success">Diterbitkan</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <a href="certificate.html" class="btn btn-ghost btn-sm">Lihat</a>
+                    <button class="btn btn-ghost btn-sm" onclick="showToast('Link verifikasi disalin','success')">Salin Link</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><code style="font-size:.78rem;color:var(--navy);background:var(--bg);padding:2px 6px;border-radius:4px;">GRCC/2026/ERM/001247</code></td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#F3E8FF;color:#7E22CE;">MK</div>
+                    <span class="td-primary">Maya Kusuma, M.Ak.</span>
+                  </div>
+                </td>
+                <td>ERM Fundamental</td>
+                <td><strong style="color:var(--teal);">91</strong></td>
+                <td>27 Mar 2026</td>
+                <td><span class="badge badge-success">Diterbitkan</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm">Lihat</button>
+                    <button class="btn btn-ghost btn-sm" onclick="showToast('Link verifikasi disalin','success')">Salin Link</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><code style="font-size:.78rem;color:var(--text-sm);background:var(--bg);padding:2px 6px;border-radius:4px;">GRCC/2026/IAF/000312</code></td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#D1FAE5;color:#065F46;">AF</div>
+                    <span class="td-primary">Ahmad Fauzi, S.E.</span>
+                  </div>
+                </td>
+                <td>Internal Audit</td>
+                <td><strong style="color:var(--navy);">88</strong></td>
+                <td>15 Jan 2026</td>
+                <td><span class="badge badge-success">Diterbitkan</span></td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="btn btn-ghost btn-sm">Lihat</button>
+                    <button class="btn btn-ghost btn-sm" onclick="showToast('Link verifikasi disalin','success')">Salin Link</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td>
+                  <div class="td-name-cell">
+                    <div class="row-avatar" style="background:#FCE7F3;color:#BE185D;">SD</div>
+                    <span class="td-primary">Sari Dewi</span>
+                  </div>
+                </td>
+                <td>Compliance Mgmt</td>
+                <td><strong style="color:var(--teal);">78</strong></td>
+                <td>—</td>
+                <td><span class="badge badge-gold">Menunggu</span></td>
+                <td><button class="btn btn-outline btn-sm" onclick="issueCert('Sari Dewi')">Terbitkan</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-sertifikat -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
+      <!--  LAPORAN                                           -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-laporan" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#EEF2FF;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" width="22" height="22"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Laporan Pembelajaran</div>
+              <div class="section-sub">Unduh laporan komprehensif aktivitas dan hasil pembelajaran</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="laporan-grid">
+
+          <div class="laporan-card">
+            <div class="laporan-card-icon" style="background:var(--teal-lt);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <div class="laporan-card-title">Laporan Data Peserta</div>
+            <div class="laporan-card-desc">Daftar lengkap peserta, institusi, program, dan status keikutsertaan.</div>
+            <div class="laporan-card-actions">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan peserta CSV','info')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan peserta XLSX','info')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan peserta PDF','info')">PDF</button>
+            </div>
+          </div>
+
+          <div class="laporan-card">
+            <div class="laporan-card-icon" style="background:#F0FDF4;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" width="20" height="20"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="laporan-card-title">Laporan Progress</div>
+            <div class="laporan-card-desc">Progress modul, quiz, dan aktivitas belajar per peserta secara rinci.</div>
+            <div class="laporan-card-actions">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan progress CSV','info')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan progress XLSX','info')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan progress PDF','info')">PDF</button>
+            </div>
+          </div>
+
+          <div class="laporan-card">
+            <div class="laporan-card-icon" style="background:#FEF2F2;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="laporan-card-title">Laporan Nilai Ujian</div>
+            <div class="laporan-card-desc">Rekap nilai pre/post/final exam, rata-rata, dan tingkat kelulusan.</div>
+            <div class="laporan-card-actions">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan nilai CSV','info')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan nilai XLSX','info')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan nilai PDF','info')">PDF</button>
+            </div>
+          </div>
+
+          <div class="laporan-card">
+            <div class="laporan-card-icon" style="background:#FFFBEB;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" width="20" height="20"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </div>
+            <div class="laporan-card-title">Laporan Sertifikat</div>
+            <div class="laporan-card-desc">Daftar sertifikat yang diterbitkan beserta nomor dan tanggal penerbitan.</div>
+            <div class="laporan-card-actions">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan sertifikat CSV','info')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan sertifikat XLSX','info')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan sertifikat PDF','info')">PDF</button>
+            </div>
+          </div>
+
+          <div class="laporan-card">
+            <div class="laporan-card-icon" style="background:#EEF2FF;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="laporan-card-title">Laporan Eksekutif</div>
+            <div class="laporan-card-desc">Summary eksekutif untuk pimpinan GRCC — tersedia versi bulanan &amp; tahunan.</div>
+            <div class="laporan-card-actions">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan bulanan PDF','info')">Bulanan</button>
+              <button class="btn btn-primary btn-sm" onclick="showToast('Mengunduh laporan tahunan PDF','info')">Tahunan</button>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /section-laporan -->
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-main -->
+</div><!-- /admin-layout -->
+
+<div class="toast-container"></div>
+
+<script>
+const sectionTitles = {
+  dashboard: 'Dashboard Admin',
+  peserta: 'Data Peserta',
+  program: 'Manajemen Program',
+  modul: 'Modul & Materi',
+  soal: 'Bank Soal',
+  progress: 'Progress Peserta',
+  nilai: 'Nilai & Kelulusan',
+  sertifikat: 'Manajemen Sertifikat',
+  laporan: 'Laporan Pembelajaran',
+};
+
+function showSection(id) {
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.admin-link').forEach(l => l.classList.remove('active'));
+  const section = document.getElementById('section-' + id);
+  if (section) section.classList.add('active');
+  const links = document.querySelectorAll('.admin-link');
+  links.forEach(l => {
+    if (l.getAttribute('onclick') && l.getAttribute('onclick').includes(`'${id}'`)) {
+      l.classList.add('active');
+    }
+  });
+  document.getElementById('admin-page-title').textContent = sectionTitles[id] || 'Admin Panel';
+  window.scrollTo(0, 0);
+}
+
+function approveUser(name) {
+  showToast(`✅ Peserta ${name} berhasil disetujui dan diaktifkan.`, 'success');
+  document.querySelectorAll('.badge-gold').forEach(b => {
+    if (b.closest('tr') && b.closest('tr').textContent.includes(name)) {
+      b.className = 'badge badge-success';
+      b.textContent = 'Aktif';
+    }
+  });
+}
+
+function issueCert(name) {
+  showToast(`🏆 Sertifikat untuk ${name} berhasil diterbitkan!`, 'success');
+}
+
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<span>${msg}</span>`;
+  document.querySelector('.toast-container').appendChild(t);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+// Responsive toggle
+if (window.innerWidth <= 960) {
+  document.getElementById('adminToggle').style.display = 'block';
+}
+window.addEventListener('resize', () => {
+  document.getElementById('adminToggle').style.display = window.innerWidth <= 960 ? 'block' : 'none';
+});
+
+// ── Role-aware navigation ──
+(function() {
+  const role = localStorage.getItem('grcc_role') || 'admin';
+  const name = localStorage.getItem('grcc_name') || 'Dr. Hendri Kurniawan';
+  // Redirect non-admin users to their own dashboard
+  if (role === 'peserta')    { window.location.replace('dashboard.html'); return; }
+  if (role === 'instruktur') { window.location.replace('instruktur.html'); return; }
+  // Logout handler
+  document.querySelectorAll('a[href="login.html"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      localStorage.removeItem('grcc_role');
+      localStorage.removeItem('grcc_name');
+      localStorage.removeItem('grcc_email');
+      localStorage.removeItem('grcc_user_key');
+      window.location.href='login.html';
+    });
+  });
+})();
+</script>
+</body>
+</html>

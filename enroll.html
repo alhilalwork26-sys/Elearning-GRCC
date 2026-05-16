@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enroll Program — GRCC Academy</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/d-sidebar.css">
+  <style>
+
+    /* ── Code Search Hero ── */
+    .enroll-hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #0d3160 60%, #0a2744 100%);
+      border-radius: var(--r-xl);
+      padding: 40px 36px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .enroll-hero::before {
+      content:'';
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(ellipse 50% 80% at 90% 50%, rgba(20,184,166,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 50% at 10% 10%, rgba(212,160,23,.08) 0%, transparent 60%);
+      pointer-events:none;
+    }
+    .enroll-hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      position: relative;
+    }
+    .enroll-hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(20,184,166,.15);
+      border: 1px solid rgba(20,184,166,.3);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+    .enroll-hero-title {
+      font-family: var(--font-h);
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: white;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .enroll-hero-title span { color: var(--teal); }
+    .enroll-hero-desc { font-size: .875rem; color: rgba(255,255,255,.55); line-height: 1.6; }
+
+    /* Code input */
+    .code-search-wrap {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--r-lg);
+      padding: 20px;
+    }
+    .code-search-label {
+      font-size: .8125rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.5);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 10px;
+    }
+    .code-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .code-input {
+      flex: 1;
+      padding: 13px 16px;
+      background: rgba(255,255,255,.1);
+      border: 1.5px solid rgba(255,255,255,.15);
+      border-radius: var(--r-md);
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      outline: none;
+      transition: border-color .2s, background .2s;
+    }
+    .code-input::placeholder { color: rgba(255,255,255,.3); font-weight: 400; letter-spacing: 0; text-transform: none; }
+    .code-input:focus { border-color: var(--teal); background: rgba(20,184,166,.08); }
+    .code-input.error { border-color: var(--danger); }
+    .code-input.success { border-color: var(--success); }
+    .code-search-btn {
+      padding: 13px 22px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: var(--r-md);
+      font-size: .9375rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      white-space: nowrap;
+      box-shadow: 0 2px 12px rgba(20,184,166,.35);
+    }
+    .code-search-btn:hover { background: var(--teal-dk); box-shadow: 0 4px 20px rgba(20,184,166,.45); }
+    .code-search-btn:active { transform: scale(.98); }
+    .code-search-btn .spin {
+      width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+      border-top-color:white;border-radius:50%;
+      animation:spin .7s linear infinite;display:none;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .code-error-msg { font-size:.8125rem;color:var(--danger);margin-top:8px;display:none;background:rgba(239,68,68,.1);border-radius:var(--r);padding:8px 12px; }
+    .code-error-msg.show { display:block; }
+
+    /* Search result card */
+    .code-result {
+      display: none;
+      margin-top: 14px;
+      background: rgba(255,255,255,.08);
+      border: 1.5px solid rgba(20,184,166,.4);
+      border-radius: var(--r-md);
+      padding: 16px;
+      position: relative;
+    }
+    .code-result.show { display: block; }
+    .code-result-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+    .code-result-icon {
+      width: 44px;height: 44px;
+      border-radius: var(--r);
+      display: flex;align-items:center;justify-content:center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .code-result-info { flex: 1; }
+    .code-result-name { font-weight: 800; font-size: .9375rem; color: white; line-height: 1.3; margin-bottom: 4px; }
+    .code-result-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .code-result-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: .8rem; color: rgba(255,255,255,.5); border-top: 1px solid rgba(255,255,255,.1); padding-top: 12px; }
+    .code-result-meta span { display: flex; align-items: center; gap: 4px; }
+    .code-result-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .btn-enroll-now {
+      padding: 10px 20px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: var(--r-md);
+      font-size: .875rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;align-items:center;gap:6px;
+      transition: all .2s;
+      box-shadow: 0 2px 8px rgba(20,184,166,.4);
+    }
+    .btn-enroll-now:hover { background: var(--teal-dk); }
+    .btn-enroll-now:disabled { background: var(--success); cursor: default; }
+    .btn-detail-link {
+      padding: 10px 16px;
+      background: rgba(255,255,255,.1);
+      color: rgba(255,255,255,.8);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--r-md);
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;align-items:center;gap:6px;
+      transition: all .2s;
+    }
+    .btn-detail-link:hover { background: rgba(255,255,255,.18); }
+
+    /* ── Section header ── */
+    .enroll-section-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .enroll-section-title {
+      font-family: var(--font-h);
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .enroll-section-title span { color: var(--teal); }
+
+    /* Filter tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: .8125rem;
+      font-weight: 600;
+      color: var(--text-sm);
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .filter-tab.active {
+      background: var(--navy);
+      color: white;
+      border-color: var(--navy);
+    }
+    .filter-tab:hover:not(.active) { border-color: var(--teal); color: var(--teal); }
+
+    /* Search bar */
+    .prog-search-bar {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .prog-search-bar svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-xs);
+      pointer-events: none;
+    }
+    .prog-search-bar input {
+      width: 100%;
+      padding: 11px 16px 11px 42px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      font-size: .9rem;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .prog-search-bar input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(20,184,166,.1); }
+
+    /* Program cards grid */
+    .prog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .prog-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      transition: all .2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .prog-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.1); border-color: var(--teal); transform: translateY(-2px); }
+    .prog-card.enrolled { border-color: var(--success); }
+    .prog-card.enrolled::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--success);
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+    }
+
+    .prog-card-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+    .prog-card-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--r);
+      display: flex;align-items:center;justify-content:center;
+      font-size: 1.375rem;
+      flex-shrink: 0;
+    }
+    .prog-card-icon.risk  { background: rgba(245,158,11,.1); }
+    .prog-card-icon.comp  { background: rgba(20,184,166,.1); }
+    .prog-card-icon.gov   { background: rgba(99,102,241,.1); }
+    .prog-card-icon.esg   { background: rgba(34,197,94,.1); }
+    .prog-card-icon.it    { background: rgba(59,130,246,.1); }
+    .prog-card-icon.fin   { background: rgba(239,68,68,.1); }
+
+    .prog-card-info { flex: 1; min-width: 0; }
+    .prog-card-code {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-xs);
+      margin-bottom: 4px;
+    }
+    .prog-card-name {
+      font-weight: 800;
+      font-size: .9375rem;
+      color: var(--navy);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+    .prog-card-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    .prog-card-desc {
+      font-size: .8375rem;
+      color: var(--text-sm);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+    .prog-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 12px 0;
+      border-top: 1px solid var(--border-lt);
+      border-bottom: 1px solid var(--border-lt);
+      margin-bottom: 16px;
+    }
+    .prog-meta-item { text-align: center; }
+    .prog-meta-val { font-size: .9375rem; font-weight: 800; color: var(--navy); }
+    .prog-meta-key { font-size: .68rem; color: var(--text-xs); margin-top: 1px; }
+
+    .prog-card-footer { display: flex; gap: 8px; align-items: center; }
+    .btn-enroll {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: var(--r-md);
+      font-size: .875rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      display: flex;align-items:center;justify-content:center;gap:6px;
+    }
+    .btn-enroll.unenrolled {
+      background: var(--teal);
+      color: white;
+      box-shadow: 0 2px 8px rgba(20,184,166,.3);
+    }
+    .btn-enroll.unenrolled:hover { background: var(--teal-dk); box-shadow: 0 4px 16px rgba(20,184,166,.4); }
+    .btn-enroll.enrolled-state {
+      background: var(--success-bg);
+      color: var(--success);
+      cursor: default;
+    }
+    .btn-enroll .spin {
+      width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+      border-top-color:white;border-radius:50%;
+      animation:spin .7s linear infinite;display:none;
+    }
+    .btn-prog-detail {
+      padding: 10px 12px;
+      border-radius: var(--r-md);
+      font-size: .875rem;
+      font-weight: 600;
+      color: var(--text-sm);
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      display: flex;align-items:center;gap:5px;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-prog-detail:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* Enrolled badge on card */
+    .enrolled-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--success);
+      color: white;
+      font-size: .68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 99px;
+      display: none;
+    }
+    .prog-card.enrolled .enrolled-badge { display: block; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-xs);
+      display: none;
+    }
+    .empty-state.show { display: block; }
+    .empty-state svg { width:48px;height:48px;opacity:.25;margin-bottom:12px; }
+    .empty-state p { font-size: .9rem; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--navy);
+      color: white;
+      padding: 14px 20px;
+      border-radius: var(--r-lg);
+      font-size: .875rem;
+      font-weight: 600;
+      box-shadow: 0 8px 32px rgba(0,0,0,.25);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .35s cubic-bezier(.34,1.56,.64,1);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 360px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--success); }
+    .toast.warning { background: var(--warning); color: var(--navy); }
+
+    /* My enrolled programs strip */
+    .my-enrolled-strip {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      display: none;
+    }
+    .my-enrolled-strip.show { display: block; }
+    .my-enrolled-strip-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .my-enrolled-strip-title { font-weight: 800; font-size: .9375rem; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+    .my-enrolled-list { display: flex; gap: 10px; flex-wrap: wrap; }
+    .my-enrolled-chip {
+      display: flex;align-items:center;gap:8px;
+      padding: 8px 14px;
+      background: var(--success-bg);
+      border: 1.5px solid rgba(34,197,94,.25);
+      border-radius: var(--r-md);
+      font-size: .8125rem;
+      font-weight: 600;
+      color: var(--navy);
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .my-enrolled-chip:hover { border-color: var(--success); box-shadow: 0 2px 8px rgba(34,197,94,.2); }
+    .my-enrolled-chip .chip-dot { width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0; }
+    .my-enrolled-chip .chip-icon { font-size: 1rem; }
+
+    @media (max-width: 768px) {
+      .enroll-hero-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="d-page-layout">
+
+  <!-- ── SIDEBAR OVERLAY (mobile) ── -->
+  <div class="d-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="d-sidebar" id="sidebar">
+    <div class="d-sidebar-brand">
+      <div class="d-sidebar-logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="d-sidebar-brand-name">GRCC Academy</span>
+    </div>
+    <nav class="d-sidebar-nav">
+      <span class="d-nav-section-label">OVERVIEW</span>
+      <a href="dashboard.html" class="d-nav-link" id="dashLink">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        Dashboard
+      </a>
+      <a href="helpdesk.html" class="d-nav-link">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        Helpdesk
+      </a>
+      <a href="materi.html" class="d-nav-link">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+        Materi
+      </a>
+      <a href="quiz.html" class="d-nav-link">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+        Quiz &amp; Latihan
+      </a>
+      <a href="exam.html" class="d-nav-link">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+        Ujian
+      </a>
+      <a href="certificate.html" class="d-nav-link">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+        Sertifikat
+      </a>
+      <a href="programs.html" class="d-nav-link">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        Program
+      </a>
+      <a href="enroll.html" class="d-nav-link active">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        Enroll Program
+      </a>
+      <span class="d-nav-section-label" style="margin-top:16px;">PENGATURAN</span>
+      <a href="#" class="d-nav-link">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20v-2a8 8 0 0 1 16 0v2"/></svg></span>
+        Profil Saya
+      </a>
+      <a href="login.html" class="d-nav-link d-nav-logout" id="logoutLink">
+        <span class="d-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+        Keluar
+      </a>
+    </nav>
+    <div class="d-sidebar-user">
+      <div class="d-sidebar-avatar" id="dSidebarAvatar">AF</div>
+      <div class="d-sidebar-user-info">
+        <div class="d-sidebar-name" id="dSidebarName">Ahmad Fauzi, S.E.</div>
+        <div class="d-sidebar-role-txt" id="dSidebarRole">Peserta Aktif</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="d-main-area">
+    <header class="d-page-topbar">
+      <button class="d-hamburger" onclick="openSidebar()" aria-label="Menu" style="display:flex;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="d-page-topbar-title">Enroll Program</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 12px;background:var(--bg);border-radius:99px;cursor:pointer;border:1px solid var(--border);">
+          <div class="d-sidebar-avatar" style="width:28px;height:28px;font-size:.7rem;" id="topbarAvatar">AF</div>
+          <span style="font-size:.875rem;font-weight:600;color:var(--navy);" id="topbarName">Ahmad Fauzi</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-page">
+
+      <!-- ── Hero: Code Search ── -->
+      <div class="enroll-hero">
+        <div class="enroll-hero-grid">
+          <div>
+            <div class="enroll-hero-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Enroll dengan Kode
+            </div>
+            <h1 class="enroll-hero-title">Aktifkan Program<br>dengan <span>Kode Akses</span></h1>
+            <p class="enroll-hero-desc">Masukkan kode program yang diberikan instruktur atau instansi Anda untuk langsung mengakses materi pembelajaran.</p>
+          </div>
+          <div>
+            <div class="code-search-wrap">
+              <div class="code-search-label">Kode Program</div>
+              <div class="code-input-row">
+                <input
+                  type="text"
+                  class="code-input"
+                  id="codeInput"
+                  placeholder="Contoh: ERM-2026"
+                  maxlength="20"
+                  autocomplete="off"
+                  spellcheck="false"
+                  oninput="this.value=this.value.toUpperCase()"
+                  onkeydown="if(event.key==='Enter')searchByCode()"
+                >
+                <button class="code-search-btn" onclick="searchByCode()">
+                  <span class="spin" id="codeSpinner"></span>
+                  <svg id="codeSearchIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Cari
+                </button>
+              </div>
+              <div class="code-error-msg" id="codeError"></div>
+              <div class="code-result" id="codeResult">
+                <div class="code-result-top">
+                  <div class="code-result-icon" id="codeResultIcon"></div>
+                  <div class="code-result-info">
+                    <div class="code-result-name" id="codeResultName"></div>
+                    <div class="code-result-badges" id="codeResultBadges"></div>
+                  </div>
+                </div>
+                <div class="code-result-meta" id="codeResultMeta"></div>
+                <div class="code-result-actions">
+                  <button class="btn-enroll-now" id="codeEnrollBtn" onclick="enrollFromCode()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M5 12l5 5L20 7"/></svg>
+                    Enroll Sekarang
+                  </button>
+                  <a href="program-detail.html" class="btn-detail-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Lihat Detail
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── My Enrolled Strip ── -->
+      <div class="my-enrolled-strip" id="myEnrolledStrip">
+        <div class="my-enrolled-strip-hd">
+          <div class="my-enrolled-strip-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="color:var(--success)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Program Saya
+          </div>
+          <a href="dashboard.html" class="btn btn-ghost btn-sm">Lihat di Dashboard →</a>
+        </div>
+        <div class="my-enrolled-list" id="myEnrolledList"></div>
+      </div>
+
+      <!-- ── All Programs ── -->
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:24px;">
+        <div class="enroll-section-hd">
+          <div class="enroll-section-title">Semua Program <span id="programCount"></span></div>
+          <div class="filter-tabs" id="filterTabs">
+            <div class="filter-tab active" data-cat="all" onclick="setFilter('all',this)">Semua</div>
+            <div class="filter-tab" data-cat="Risk Management" onclick="setFilter('Risk Management',this)">Risk Management</div>
+            <div class="filter-tab" data-cat="Compliance" onclick="setFilter('Compliance',this)">Compliance</div>
+            <div class="filter-tab" data-cat="Governance" onclick="setFilter('Governance',this)">Governance</div>
+            <div class="filter-tab" data-cat="ESG" onclick="setFilter('ESG',this)">ESG</div>
+            <div class="filter-tab" data-cat="IT Risk" onclick="setFilter('IT Risk',this)">IT Risk</div>
+          </div>
+        </div>
+
+        <div class="prog-search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="progSearch" placeholder="Cari program berdasarkan nama atau kode..." oninput="renderCards()">
+        </div>
+
+        <div class="prog-grid" id="progGrid"></div>
+        <div class="empty-state" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <p>Tidak ada program yang cocok dengan pencarian Anda.</p>
+        </div>
+      </div>
+
+    </div><!-- /app-page -->
+  </div><!-- /.d-main-area -->
+</div><!-- /.d-page-layout -->
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Data Katalog ── */
+const PROGRAMS = [
+  {
+    code: 'ERM-2026',
+    title: 'Enterprise Risk Management (ERM) — Fundamental',
+    category: 'Risk Management',
+    level: 'Intermediate',
+    icon: '⚖️',
+    iconClass: 'risk',
+    desc: 'Memahami prinsip-prinsip ERM, kerangka COSO 2017, ISO 31000:2018, dan implementasi manajemen risiko di organisasi.',
+    modules: 8,
+    hours: '24 jam',
+    participants: '1.240',
+    badgeClass: 'badge-gold',
+  },
+  {
+    code: 'COMP-REG',
+    title: 'Kepatuhan Regulasi Perbankan & Keuangan',
+    category: 'Compliance',
+    level: 'Intermediate',
+    icon: '🏦',
+    iconClass: 'comp',
+    desc: 'Memahami regulasi OJK, BI, dan LPS. Meliputi POJK terbaru, kepatuhan AML/CFT, dan tata kelola bank.',
+    modules: 10,
+    hours: '30 jam',
+    participants: '876',
+    badgeClass: 'badge-teal',
+  },
+  {
+    code: 'GCG-BASIC',
+    title: 'Tata Kelola Perusahaan yang Baik (GCG)',
+    category: 'Governance',
+    level: 'Basic',
+    icon: '🏛️',
+    iconClass: 'gov',
+    desc: 'Prinsip-prinsip Good Corporate Governance (TARIF), peran Dewan Komisaris & Direksi, serta implementasi di BUMN dan swasta.',
+    modules: 6,
+    hours: '18 jam',
+    participants: '2.100',
+    badgeClass: 'badge-info',
+  },
+  {
+    code: 'ISO-31000',
+    title: 'Implementasi ISO 31000:2018',
+    category: 'Risk Management',
+    level: 'Advanced',
+    icon: '📋',
+    iconClass: 'risk',
+    desc: 'Panduan implementasi standar ISO 31000:2018 secara mendalam. Mencakup framework, proses, dan integrasi dengan sistem manajemen lainnya.',
+    modules: 5,
+    hours: '15 jam',
+    participants: '543',
+    badgeClass: 'badge-gold',
+  },
+  {
+    code: 'AML-2026',
+    title: 'Anti-Money Laundering & KYC Praktis',
+    category: 'Compliance',
+    level: 'Intermediate',
+    icon: '🔍',
+    iconClass: 'comp',
+    desc: 'Teknik AML/CFT, prosedur KYC/CDD sesuai FATF, pelaporan STR/CTR, serta studi kasus kasus nyata di Indonesia.',
+    modules: 7,
+    hours: '21 jam',
+    participants: '1.050',
+    badgeClass: 'badge-teal',
+  },
+  {
+    code: 'ESG-GRCC',
+    title: 'ESG & Sustainability Reporting',
+    category: 'ESG',
+    level: 'Advanced',
+    icon: '🌱',
+    iconClass: 'esg',
+    desc: 'Memahami standar GRI, SASB, TCFD, dan ISSB. Menyusun laporan keberlanjutan dan mengintegrasikan ESG dalam strategi bisnis.',
+    modules: 6,
+    hours: '20 jam',
+    participants: '718',
+    badgeClass: 'badge-success',
+  },
+  {
+    code: 'ITHD-2026',
+    title: 'IT Risk & Keamanan Siber untuk Praktisi GRC',
+    category: 'IT Risk',
+    level: 'Intermediate',
+    icon: '🔐',
+    iconClass: 'it',
+    desc: 'Mengelola risiko teknologi informasi, keamanan siber (ISO 27001), dan integrasi IT risk ke dalam kerangka ERM organisasi.',
+    modules: 7,
+    hours: '22 jam',
+    participants: '634',
+    badgeClass: 'badge-navy',
+  },
+  {
+    code: 'OPS-RISK',
+    title: 'Manajemen Risiko Operasional',
+    category: 'Risk Management',
+    level: 'Intermediate',
+    icon: '⚙️',
+    iconClass: 'risk',
+    desc: 'Identifikasi, asesmen, dan pengendalian risiko operasional. Mencakup RCSA, KRI, Loss Database, dan Basel III.',
+    modules: 6,
+    hours: '18 jam',
+    participants: '927',
+    badgeClass: 'badge-gold',
+  },
+  {
+    code: 'AUDIT-INT',
+    title: 'Audit Internal Berbasis Risiko',
+    category: 'Governance',
+    level: 'Advanced',
+    icon: '🔎',
+    iconClass: 'gov',
+    desc: 'Perencanaan dan pelaksanaan audit berbasis risiko (RBIA) sesuai standar IIA. Termasuk penyusunan program audit dan laporan temuan.',
+    modules: 8,
+    hours: '26 jam',
+    participants: '482',
+    badgeClass: 'badge-info',
+  },
+  {
+    code: 'TAXRISK',
+    title: 'Manajemen Risiko Pajak & Transfer Pricing',
+    category: 'Compliance',
+    level: 'Advanced',
+    icon: '📊',
+    iconClass: 'fin',
+    desc: 'Identifikasi dan mitigasi risiko pajak, aturan transfer pricing Indonesia (OECD BEPS), serta dokumentasi TP yang benar.',
+    modules: 5,
+    hours: '16 jam',
+    participants: '361',
+    badgeClass: 'badge-teal',
+  },
+  {
+    code: 'FRAUD-GRC',
+    title: 'Fraud Prevention & Anti-Korupsi',
+    category: 'Compliance',
+    level: 'Basic',
+    icon: '🛡️',
+    iconClass: 'comp',
+    desc: 'Memahami skema fraud (ACFE Fraud Tree), red flags, investigasi internal, whistleblowing system, dan UU Tipikor.',
+    modules: 6,
+    hours: '19 jam',
+    participants: '1.380',
+    badgeClass: 'badge-teal',
+  },
+  {
+    code: 'BCMS-ISO',
+    title: 'Business Continuity Management (ISO 22301)',
+    category: 'Risk Management',
+    level: 'Advanced',
+    icon: '🔄',
+    iconClass: 'risk',
+    desc: 'Menyusun BCP & DRP, analisis BIA, strategi pemulihan, dan sertifikasi ISO 22301 untuk ketahanan organisasi.',
+    modules: 7,
+    hours: '23 jam',
+    participants: '409',
+    badgeClass: 'badge-gold',
+  },
+];
+
+const LEVEL_BADGE = {
+  'Basic':        '<span class="badge" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;">Basic</span>',
+  'Intermediate': '<span class="badge" style="background:#fefce8;color:#854d0e;border:1px solid #fef08a;">Intermediate</span>',
+  'Advanced':     '<span class="badge" style="background:#fdf4ff;color:#7e22ce;border:1px solid #e9d5ff;">Advanced</span>',
+};
+const CAT_BADGE = {
+  'Risk Management': '<span class="badge badge-gold">Risk Management</span>',
+  'Compliance':      '<span class="badge badge-teal">Compliance</span>',
+  'Governance':      '<span class="badge badge-info">Governance</span>',
+  'ESG':             '<span class="badge badge-success">ESG</span>',
+  'IT Risk':         '<span class="badge badge-navy">IT Risk</span>',
+};
+
+/* ── State ── */
+let activeFilter = 'all';
+let currentCodeResult = null;
+
+/* ── LocalStorage helpers ── */
+function getEnrollmentKey() {
+  const email = (localStorage.getItem('grcc_email') || localStorage.getItem('grcc_user_key') || 'guest').toLowerCase();
+  return 'grcc_enrolled_' + email;
+}
+function getEnrolled() {
+  try { return JSON.parse(localStorage.getItem(getEnrollmentKey()) || '[]'); } catch(e) { return []; }
+}
+function saveEnrolled(arr) { localStorage.setItem(getEnrollmentKey(), JSON.stringify(arr)); }
+function isEnrolled(code) { return getEnrolled().some(e => e.code === code); }
+function moduleHref(program) {
+  return 'materi.html#prog=' + encodeURIComponent(program.code) + '&mod=' + encodeURIComponent(program.currentModule || 1);
+}
+
+function enrollProgram(code) {
+  const prog = PROGRAMS.find(p => p.code === code);
+  if (!prog || isEnrolled(code)) return false;
+  const enrolled = getEnrolled();
+  enrolled.push({
+    code: prog.code,
+    title: prog.title,
+    category: prog.category,
+    level: prog.level,
+    icon: prog.icon,
+    modules: prog.modules,
+    hours: prog.hours,
+    enrolledAt: new Date().toISOString(),
+    progress: 0,
+    currentModule: 1,
+    status: 'active',
+  });
+  saveEnrolled(enrolled);
+  return true;
+}
+
+/* ── Sidebar open/close ── */
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+/* ── Auth & sidebar info ── */
+(function initAuth() {
+  const name  = localStorage.getItem('grcc_name')  || 'Ahmad Fauzi, S.E.';
+  const role  = localStorage.getItem('grcc_role')  || 'peserta';
+  const labels = { peserta:'Peserta Aktif', admin:'Administrator', instruktur:'Instruktur' };
+  const dashMap = { peserta:'dashboard.html', admin:'admin.html', instruktur:'instruktur.html' };
+  const initials = name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+
+  const nameEl   = document.getElementById('dSidebarName');
+  const roleEl   = document.getElementById('dSidebarRole');
+  const avatarEl = document.getElementById('dSidebarAvatar');
+  if (nameEl)   nameEl.textContent   = name;
+  if (roleEl)   roleEl.textContent   = labels[role] || 'Peserta Aktif';
+  if (avatarEl) avatarEl.textContent = initials || 'AF';
+
+  const topAvatar = document.getElementById('topbarAvatar');
+  if (topAvatar) topAvatar.textContent = initials;
+  const topName = document.getElementById('topbarName');
+  if (topName) topName.textContent = name.split(' ')[0];
+
+  const dashLink = document.getElementById('dashLink');
+  if (dashLink) dashLink.href = dashMap[role] || 'dashboard.html';
+
+  document.getElementById('logoutLink').addEventListener('click', e => {
+    e.preventDefault();
+    localStorage.removeItem('grcc_role');
+    localStorage.removeItem('grcc_name');
+    localStorage.removeItem('grcc_email');
+    localStorage.removeItem('grcc_user_key');
+    window.location.href = 'login.html';
+  });
+})();
+
+/* ── Toast ── */
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const icons = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  };
+  t.innerHTML = (icons[type] || icons.info) + '<span>' + msg + '</span>';
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+/* ── Code search ── */
+function searchByCode() {
+  const input = document.getElementById('codeInput');
+  const code  = input.value.trim().toUpperCase();
+  const errEl = document.getElementById('codeError');
+  const resEl = document.getElementById('codeResult');
+  const spinner = document.getElementById('codeSpinner');
+  const icon    = document.getElementById('codeSearchIcon');
+
+  errEl.classList.remove('show');
+  resEl.classList.remove('show');
+  input.classList.remove('error','success');
+
+  if (!code) {
+    errEl.textContent = 'Masukkan kode program terlebih dahulu.';
+    errEl.classList.add('show');
+    input.classList.add('error');
+    return;
+  }
+
+  // Simulate async
+  spinner.style.display = 'block';
+  icon.style.display = 'none';
+  setTimeout(() => {
+    spinner.style.display = 'none';
+    icon.style.display = 'block';
+
+    const prog = PROGRAMS.find(p => p.code === code);
+    if (!prog) {
+      errEl.textContent = 'Kode "' + code + '" tidak ditemukan. Periksa kembali kode yang Anda masukkan.';
+      errEl.classList.add('show');
+      input.classList.add('error');
+      return;
+    }
+
+    currentCodeResult = prog;
+    input.classList.add('success');
+
+    // Populate result
+    const iconEl = document.getElementById('codeResultIcon');
+    iconEl.textContent = prog.icon;
+    iconEl.className = 'code-result-icon ' + prog.iconClass;
+
+    document.getElementById('codeResultName').textContent = prog.title;
+    document.getElementById('codeResultBadges').innerHTML =
+      (CAT_BADGE[prog.category] || '') + ' ' + (LEVEL_BADGE[prog.level] || '');
+
+    document.getElementById('codeResultMeta').innerHTML = `
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> ${prog.modules} Modul</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${prog.hours}</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ${prog.participants} peserta</span>
+    `;
+
+    const enrollBtn = document.getElementById('codeEnrollBtn');
+    if (isEnrolled(prog.code)) {
+      enrollBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Sudah Diikuti';
+      enrollBtn.disabled = true;
+      enrollBtn.style.background = 'var(--success)';
+    } else {
+      enrollBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M5 12l5 5L20 7"/></svg> Enroll Sekarang';
+      enrollBtn.disabled = false;
+      enrollBtn.style.background = '';
+    }
+
+    resEl.classList.add('show');
+  }, 600);
+}
+
+function enrollFromCode() {
+  if (!currentCodeResult) return;
+  const prog = currentCodeResult;
+  if (isEnrolled(prog.code)) return;
+  enrollProgram(prog.code);
+  const btn = document.getElementById('codeEnrollBtn');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Sudah Diikuti';
+  btn.disabled = true;
+  btn.style.background = 'var(--success)';
+  showToast('Berhasil enroll: ' + prog.title, 'success');
+  renderEnrolledStrip();
+  renderCards();
+}
+
+/* ── Filter ── */
+function setFilter(cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderCards();
+}
+
+/* ── Render cards ── */
+function renderCards() {
+  const search = (document.getElementById('progSearch').value || '').toLowerCase();
+  const grid   = document.getElementById('progGrid');
+  const empty  = document.getElementById('emptyState');
+
+  let filtered = PROGRAMS.filter(p => {
+    const matchCat  = activeFilter === 'all' || p.category === activeFilter;
+    const matchSearch = !search || p.title.toLowerCase().includes(search) || p.code.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+
+  document.getElementById('programCount').textContent = '(' + filtered.length + ')';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+
+  grid.innerHTML = filtered.map(p => {
+    const enrolled = isEnrolled(p.code);
+    return `
+    <div class="prog-card ${enrolled ? 'enrolled' : ''}" id="card-${p.code}">
+      <div class="enrolled-badge">✓ Diikuti</div>
+      <div class="prog-card-top">
+        <div class="prog-card-icon ${p.iconClass}">${p.icon}</div>
+        <div class="prog-card-info">
+          <div class="prog-card-code">${p.code}</div>
+          <div class="prog-card-name">${p.title}</div>
+          <div class="prog-card-badges">
+            ${CAT_BADGE[p.category] || ''}
+            ${LEVEL_BADGE[p.level] || ''}
+          </div>
+        </div>
+      </div>
+      <p class="prog-card-desc">${p.desc}</p>
+      <div class="prog-card-meta">
+        <div class="prog-meta-item">
+          <div class="prog-meta-val">${p.modules}</div>
+          <div class="prog-meta-key">Modul</div>
+        </div>
+        <div class="prog-meta-item">
+          <div class="prog-meta-val">${p.hours}</div>
+          <div class="prog-meta-key">Durasi</div>
+        </div>
+        <div class="prog-meta-item">
+          <div class="prog-meta-val">${p.participants}</div>
+          <div class="prog-meta-key">Peserta</div>
+        </div>
+      </div>
+      <div class="prog-card-footer">
+        <button class="btn-enroll ${enrolled ? 'enrolled-state' : 'unenrolled'}" onclick="handleEnroll('${p.code}', this)" ${enrolled ? 'disabled' : ''}>
+          <span class="spin"></span>
+          ${enrolled
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Sudah Diikuti`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg> Enroll Program`
+          }
+        </button>
+        <a href="program-detail.html" class="btn-prog-detail" title="Lihat Detail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function handleEnroll(code, btn) {
+  if (isEnrolled(code)) return;
+  const spin = btn.querySelector('.spin');
+  spin.style.display = 'block';
+  btn.disabled = true;
+  setTimeout(() => {
+    enrollProgram(code);
+    const prog = PROGRAMS.find(p => p.code === code);
+    showToast('✅ Berhasil enroll: ' + (prog ? prog.title : code), 'success');
+    renderCards();
+    renderEnrolledStrip();
+  }, 700);
+}
+
+/* ── My enrolled strip ── */
+function renderEnrolledStrip() {
+  const enrolled = getEnrolled();
+  const strip = document.getElementById('myEnrolledStrip');
+  const list  = document.getElementById('myEnrolledList');
+  if (enrolled.length === 0) { strip.classList.remove('show'); return; }
+  strip.classList.add('show');
+  list.innerHTML = enrolled.map(e => `
+    <a href="${moduleHref(e)}" class="my-enrolled-chip">
+      <span class="chip-dot"></span>
+      <span class="chip-icon">${e.icon || '📘'}</span>
+      <span>${e.title.length > 40 ? e.title.slice(0,40) + '…' : e.title}</span>
+    </a>
+  `).join('');
+}
+
+/* ── Init ── */
+renderCards();
+renderEnrolledStrip();
+
+// Pre-fill code from URL param
+const urlCode = new URLSearchParams(location.search).get('code');
+if (urlCode) {
+  document.getElementById('codeInput').value = urlCode.toUpperCase();
+  searchByCode();
+}
+</script>
+</body>
+</html>
