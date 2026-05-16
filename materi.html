@@ -452,12 +452,22 @@ function renderModuleView(code, n) {
   const info = getProgram(code) || {};
   const mods = getProgramModules(code);
   const total = mods.length;
+  if (!prog) {
+    renderPage();
+    return;
+  }
+  const progress = prog.progress || 0;
+  const completedModules = prog.completedModules || [];
+  const safeCurrent = prog.currentModule || 1;
+  if (n > safeCurrent && !completedModules.includes(n) && progress < 100) {
+    history.replaceState(null, '', `#prog=${code}&mod=${safeCurrent}`);
+    renderModuleView(code, safeCurrent);
+    return;
+  }
   const idx = Math.max(0, Math.min(n - 1, total - 1));
   const modTitle = mods[idx] || `Modul ${n}`;
   const rawHours = parseInt(prog?.hours) || parseInt(info.hours) || 18;
   const hoursPerMod = getModDurMins(rawHours, total);
-  const progress = prog?.progress || 0;
-  const completedModules = prog?.completedModules || [];
   const isCompleted = completedModules.includes(n) || progress >= 100;
   const modPct = Math.min(100, Math.round((n / total) * 100));
 
@@ -611,6 +621,18 @@ window.addEventListener('hashchange', () => {
   }
 });
 
+function routeInitialMateriView() {
+  const hp = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const code = hp.get('prog');
+  const mod  = parseInt(hp.get('mod') || '0');
+  if (code && mod) {
+    activeCode = code;
+    renderModuleView(code, mod);
+    return;
+  }
+  renderPage();
+}
+
 /* ── Sidebar JS ── */
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
@@ -645,7 +667,7 @@ function closeSidebar() {
   });
 })();
 
-renderPage();
+routeInitialMateriView();
 </script>
 </body>
 </html>

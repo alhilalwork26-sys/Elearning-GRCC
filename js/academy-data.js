@@ -443,6 +443,8 @@
     const target = getActiveEnrollment(code);
     if (!target) return null;
     const normalizedType = type || 'final';
+    if (normalizedType === 'posttest' && target.progress < 100) return null;
+    if (normalizedType === 'final' && (target.progress < 100 || !target.quizPassed)) return null;
     const pass = passingScore ? Number(score) >= Number(passingScore) : true;
     const now = new Date().toISOString();
 

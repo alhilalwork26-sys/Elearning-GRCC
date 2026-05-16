@@ -1017,7 +1017,7 @@ const { seedDemoEnrollmentsForCurrentUser, getProgramModules, moduleHref } = win
   }
 
   // ── Update ring progress ──
-  var mainProg = (enrolled[0] && enrolled[0].progress) ? enrolled[0].progress : 68;
+  var mainProg = enrolled[0] ? enrolled[0].progress : 0;
   var ringFill = document.getElementById('dRingFill');
   var ringBadge = document.getElementById('dRingPct');
   var circumference = 2 * Math.PI * 52; // r=52 → ~326.73

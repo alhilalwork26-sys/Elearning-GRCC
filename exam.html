@@ -533,6 +533,7 @@
   const { getActiveEnrollment, recordExamResult } = window.GRCCAcademy;
   const examParams = new URLSearchParams(location.search);
   const activeProgramCode = examParams.get('code') || (getActiveEnrollment()?.code || null);
+  const activeEnrollment = getActiveEnrollment(activeProgramCode);
   let currentExamType = 'pretest';
   let currentQ = 0;
   let answers = {};
@@ -549,7 +550,38 @@
     currentExamType = examParams.get('type');
   }
 
+  function examAllowed(type) {
+    if (!activeEnrollment) return false;
+    if (type === 'posttest') return activeEnrollment.progress >= 100;
+    if (type === 'final') return activeEnrollment.progress >= 100 && activeEnrollment.quizPassed;
+    return true;
+  }
+
+  function showExamLocked(type) {
+    const cfg = examConfig[type] || examConfig.pretest;
+    const code = activeEnrollment?.code || activeProgramCode || '';
+    const target = code ? `materi.html#prog=${encodeURIComponent(code)}` : 'materi.html';
+    document.getElementById('exam-selector').innerHTML = `
+      <div class="exam-card" style="max-width:640px;margin:0 auto;text-align:center;">
+        <div class="alert alert-warning" style="justify-content:center;margin-bottom:18px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          ${cfg.label} belum bisa dibuka.
+        </div>
+        <h2 style="font-family:var(--font-h);font-size:1.4rem;font-weight:800;color:var(--navy);margin-bottom:8px;">Selesaikan tahap sebelumnya dulu</h2>
+        <p style="color:var(--muted);margin-bottom:18px;">Post-Test terbuka setelah seluruh modul selesai. Final Exam terbuka setelah materi selesai dan quiz dinyatakan lulus.</p>
+        <a href="${target}" class="btn btn-primary">Kembali ke Materi</a>
+      </div>
+    `;
+    document.getElementById('exam-instructions').style.display = 'none';
+    document.getElementById('exam-main').style.display = 'none';
+    document.getElementById('quiz-result').style.display = 'none';
+  }
+
   function startExam(type) {
+    if (!examAllowed(type)) {
+      showExamLocked(type);
+      return;
+    }
     currentExamType = type;
     const cfg = examConfig[type];
     document.getElementById('exam-selector').style.display = 'none';
