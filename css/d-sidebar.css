@@ -154,6 +154,14 @@
 }
 .d-hamburger:hover { background: var(--bg, #F0F5FF); }
 
+body.d-sidebar-collapsed .d-sidebar {
+  transform: translateX(-100%);
+  box-shadow: none;
+}
+body.d-sidebar-collapsed .d-main-area {
+  margin-left: 0;
+}
+
 /* ══ RESPONSIVE ══ */
 @media (max-width: 900px) {
   .d-sidebar {

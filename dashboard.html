@@ -1033,21 +1033,6 @@ const { seedDemoEnrollmentsForCurrentUser, getProgramModules, moduleHref } = win
   if (ringBadge) ringBadge.textContent = mainProg + '%';
 })();
 
-// ── Sidebar mobile toggle ──
-document.addEventListener('click', function(e) {
-  var menuBtn = e.target.closest('#dMenuBtn');
-  if (menuBtn) {
-    document.getElementById('dSidebar').classList.toggle('open');
-  }
-  // Close sidebar when clicking outside on mobile
-  var sidebar = document.getElementById('dSidebar');
-  if (sidebar && sidebar.classList.contains('open')) {
-    if (!e.target.closest('.d-sidebar') && !e.target.closest('#dMenuBtn')) {
-      sidebar.classList.remove('open');
-    }
-  }
-});
-
 // ── Carousel buttons (simple toggle active) ──
 (function() {
   var prev = document.getElementById('dCarouselPrev');
@@ -1064,5 +1049,6 @@ document.addEventListener('click', function(e) {
   }
 })();
 </script>
+<script src="js/sidebar.js"></script>
 </body>
 </html>
