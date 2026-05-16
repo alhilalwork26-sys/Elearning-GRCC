@@ -35,6 +35,14 @@
       scrollbar-width: none;
     }
     .admin-sidebar::-webkit-scrollbar { display: none; }
+    .admin-sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 45;
+      background: rgba(7,24,48,.46);
+    }
+    .admin-sidebar-overlay.show { display: block; }
 
     /* Brand / Logo */
     .admin-sidebar-brand {
@@ -474,7 +482,7 @@
       .dash-row { grid-template-columns: 1fr; }
     }
     @media (max-width: 960px) {
-      .admin-sidebar { transform: translateX(-100%); transition: transform .3s var(--ease); box-shadow: var(--sh-lg); }
+      .admin-sidebar { transform: translateX(-100%); transition: transform .3s var(--ease); box-shadow: var(--sh-lg); z-index: 50; }
       .admin-sidebar.open { transform: translateX(0); }
       .admin-main { margin-left: 0; }
       #adminToggle { display: block !important; }
@@ -491,6 +499,7 @@
 </head>
 <body>
 <div class="admin-layout">
+  <div class="admin-sidebar-overlay" id="adminSidebarOverlay" onclick="closeAdminSidebar()"></div>
 
   <!-- ═══════════════════════════════════════════════════════ -->
   <!--  SIDEBAR                                               -->
@@ -507,52 +516,52 @@
 
       <div class="admin-nav-label">Utama</div>
 
-      <a class="admin-link active" onclick="showSection('dashboard')">
+      <a class="admin-link active" href="#dashboard" onclick="showSection('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Dashboard
       </a>
 
-      <a class="admin-link" onclick="showSection('peserta')">
+      <a class="admin-link" href="#peserta" onclick="showSection('peserta')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Data Peserta
         <span class="badge-dot">3</span>
       </a>
 
-      <a class="admin-link" onclick="showSection('program')">
+      <a class="admin-link" href="#program" onclick="showSection('program')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         Program
       </a>
 
-      <a class="admin-link" onclick="showSection('modul')">
+      <a class="admin-link" href="#modul" onclick="showSection('modul')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         Modul &amp; Materi
       </a>
 
-      <a class="admin-link" onclick="showSection('soal')">
+      <a class="admin-link" href="#soal" onclick="showSection('soal')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Bank Soal
       </a>
 
       <div class="admin-nav-label" style="margin-top:10px;">Monitoring</div>
 
-      <a class="admin-link" onclick="showSection('progress')">
+      <a class="admin-link" href="#progress" onclick="showSection('progress')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Progress Peserta
       </a>
 
-      <a class="admin-link" onclick="showSection('nilai')">
+      <a class="admin-link" href="#nilai" onclick="showSection('nilai')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Nilai &amp; Kelulusan
       </a>
 
-      <a class="admin-link" onclick="showSection('sertifikat')">
+      <a class="admin-link" href="#sertifikat" onclick="showSection('sertifikat')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
         Sertifikat
       </a>
 
       <div class="admin-nav-label" style="margin-top:10px;">Laporan</div>
 
-      <a class="admin-link" onclick="showSection('laporan')">
+      <a class="admin-link" href="#laporan" onclick="showSection('laporan')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Laporan Pembelajaran
       </a>
@@ -587,7 +596,7 @@
 
     <!-- Top bar -->
     <header class="admin-topbar">
-      <button id="adminToggle" onclick="document.getElementById('adminSidebar').classList.toggle('open')" aria-label="Toggle sidebar">
+      <button id="adminToggle" onclick="toggleAdminSidebar()" aria-label="Toggle sidebar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
 
@@ -1791,7 +1800,22 @@ const sectionTitles = {
   laporan: 'Laporan Pembelajaran',
 };
 
+function getStoredValue(key, fallback) {
+  try {
+    return localStorage.getItem(key) || fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function removeStoredValue(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {}
+}
+
 function showSection(id) {
+  if (!sectionTitles[id]) id = 'dashboard';
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.admin-link').forEach(l => l.classList.remove('active'));
   const section = document.getElementById('section-' + id);
@@ -1803,7 +1827,22 @@ function showSection(id) {
     }
   });
   document.getElementById('admin-page-title').textContent = sectionTitles[id] || 'Admin Panel';
+  if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+  closeAdminSidebar();
   window.scrollTo(0, 0);
+}
+
+function toggleAdminSidebar() {
+  const sidebar = document.getElementById('adminSidebar');
+  const overlay = document.getElementById('adminSidebarOverlay');
+  if (!sidebar) return;
+  const open = sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('show', open);
+}
+
+function closeAdminSidebar() {
+  document.getElementById('adminSidebar')?.classList.remove('open');
+  document.getElementById('adminSidebarOverlay')?.classList.remove('show');
 }
 
 function approveUser(name) {
@@ -1839,23 +1878,35 @@ window.addEventListener('resize', () => {
 
 // ── Role-aware navigation ──
 (function() {
-  const role = localStorage.getItem('grcc_role') || 'admin';
-  const name = localStorage.getItem('grcc_name') || 'Dr. Hendri Kurniawan';
+  const role = getStoredValue('grcc_role', 'admin');
+  const name = getStoredValue('grcc_name', 'Dr. Hendri Kurniawan');
   // Redirect non-admin users to their own dashboard
   if (role === 'peserta')    { window.location.replace('dashboard.html'); return; }
   if (role === 'instruktur') { window.location.replace('instruktur.html'); return; }
+  const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'AD';
+  const shortName = name.length > 16 ? name.slice(0, 14) + '…' : name;
+  document.querySelectorAll('.admin-avatar-lg, .admin-topbar-avatar').forEach(el => { el.textContent = initials; });
+  const nameEl = document.querySelector('.admin-user-name');
+  if (nameEl) nameEl.textContent = shortName;
+  const roleEl = document.querySelector('.admin-user-role');
+  if (roleEl) roleEl.textContent = 'Super Admin';
+  showSection((location.hash || '#dashboard').replace('#', ''));
   // Logout handler
   document.querySelectorAll('a[href="login.html"]').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
-      localStorage.removeItem('grcc_role');
-      localStorage.removeItem('grcc_name');
-      localStorage.removeItem('grcc_email');
-      localStorage.removeItem('grcc_user_key');
+      removeStoredValue('grcc_role');
+      removeStoredValue('grcc_name');
+      removeStoredValue('grcc_email');
+      removeStoredValue('grcc_user_key');
       window.location.href='login.html';
     });
   });
 })();
+
+window.addEventListener('hashchange', () => {
+  showSection((location.hash || '#dashboard').replace('#', ''));
+});
 </script>
 </body>
 </html>
