@@ -12,6 +12,35 @@
     return window.matchMedia('(max-width: 900px)').matches;
   }
 
+  function populateProgramShortcuts() {
+    const target = document.getElementById('dProgShortcuts');
+    const academy = window.GRCCAcademy;
+    if (!target || !academy || typeof academy.getEnrolled !== 'function') return;
+
+    const enrolled = typeof academy.seedDemoEnrollmentsForCurrentUser === 'function'
+      ? academy.seedDemoEnrollmentsForCurrentUser()
+      : academy.getEnrolled();
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, function (char) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char];
+      });
+    }
+    if (!enrolled.length) {
+      target.innerHTML = '<a href="enroll.html" class="d-prog-shortcut"><div class="d-prog-shortcut-dot" style="background:#14B8A6;"></div><span class="d-prog-shortcut-title">Enroll program baru</span></a>';
+      return;
+    }
+
+    const colors = ['#14B8A6', '#0B2447', '#22C55E', '#F59E0B'];
+    target.innerHTML = enrolled.map(function (program, index) {
+      const title = program.title || program.code || 'Program';
+      const href = academy.moduleHref ? academy.moduleHref(program) : 'materi.html';
+      return '<a href="' + href + '" class="d-prog-shortcut">' +
+        '<div class="d-prog-shortcut-dot" style="background:' + colors[index % colors.length] + ';"></div>' +
+        '<span class="d-prog-shortcut-title">' + escapeHtml(title) + '</span>' +
+      '</a>';
+    }).join('');
+  }
+
   function showSidebar() {
     const sidebar = sidebarEl();
     if (!sidebar) return;
@@ -68,4 +97,10 @@
     overlayEl()?.classList.remove('show');
     if (!isMobileLayout()) sidebar.classList.remove('open');
   });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', populateProgramShortcuts);
+  } else {
+    populateProgramShortcuts();
+  }
 })();

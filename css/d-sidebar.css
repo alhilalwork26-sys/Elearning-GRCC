@@ -97,6 +97,12 @@
 }
 .d-prog-shortcut:hover { background: var(--bg, #F0F5FF); color: #0B2447; }
 .d-prog-shortcut-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.d-prog-shortcut-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* User block at bottom */
 .d-sidebar-user {
