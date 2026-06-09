@@ -374,6 +374,79 @@
     }
     .sidebar-logout:hover { color: var(--danger); }
 
+    .instr-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(7,24,48,.5);
+    }
+    .instr-modal.show { display: flex; }
+    .instr-modal-card {
+      width: min(560px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-lg);
+    }
+    .instr-modal-head,
+    .instr-modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .instr-modal-actions {
+      justify-content: flex-end;
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+    }
+    .instr-modal-title { font-weight: 800; color: var(--navy); }
+    .instr-modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--text-sm);
+      font-size: 1rem;
+    }
+    .instr-modal-body { padding: 18px; }
+    .instr-field { display: grid; gap: 6px; margin-top: 12px; }
+    .instr-field label {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-xs);
+      font-weight: 800;
+    }
+    .instr-field input,
+    .instr-field textarea,
+    .instr-field select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 10px 12px;
+      font: inherit;
+      color: var(--text);
+      background: var(--white);
+    }
+    .instr-field textarea { min-height: 90px; resize: vertical; }
+    .instr-note {
+      padding: 12px 14px;
+      border-radius: var(--r-md);
+      background: var(--bg);
+      color: var(--text-sm);
+      font-size: .88rem;
+      line-height: 1.55;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 900px) {
       .instr-stat-grid { grid-template-columns: repeat(2, 1fr); }
@@ -403,7 +476,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Dashboard
       </a>
-      <a href="#" class="sidebar-link" onclick="toast('Halaman Program Saya','info')">
+      <a href="#" class="sidebar-link" onclick="showTab('program')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         Program Saya
         <span style="margin-left:auto;background:var(--teal);color:white;border-radius:99px;font-size:.625rem;font-weight:700;padding:2px 7px;">3</span>
@@ -412,7 +485,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         Kelola Modul
       </a>
-      <a href="#" class="sidebar-link" onclick="toast('Bank Soal Instruktur','info')">
+      <a href="#" class="sidebar-link" onclick="showTab('soal')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Bank Soal
       </a>
@@ -470,7 +543,7 @@
       </button>
       <div class="app-topbar-title" id="pageTitle">Dashboard Instruktur</div>
       <div class="app-topbar-right">
-        <button class="btn btn-primary btn-sm" onclick="toast('Membuat sesi live baru','info')" style="display:flex;align-items:center;gap:6px;">
+        <button class="btn btn-primary btn-sm" onclick="openInstructorWorkPanel('Buat Sesi Live','Atur judul sesi, program, waktu, dan catatan persiapan. Data tersimpan sebagai simulasi lokal pada halaman instruktur.')" style="display:flex;align-items:center;gap:6px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Buat Sesi Live
         </button>
@@ -574,10 +647,10 @@
           <div class="instr-left-col">
 
             <!-- Program yang diajar -->
-            <div class="section-card">
+            <div class="section-card" id="instructorProgramPanel">
               <div class="section-head">
                 <div class="section-title">Program yang Saya Ajar</div>
-                <button class="btn btn-outline btn-sm" onclick="toast('Mengajukan program baru','info')">+ Ajukan Program</button>
+                <button class="btn btn-outline btn-sm" onclick="openInstructorWorkPanel('Ajukan Program Baru','Ajukan nama program, sasaran peserta, dan kebutuhan modul untuk direview admin.')">+ Ajukan Program</button>
               </div>
               <div style="display:flex;flex-direction:column;gap:14px;">
 
@@ -615,8 +688,8 @@
                     </div>
                     <div class="prog-actions">
                       <a href="materi.html" class="btn btn-primary btn-sm">Kelola Modul</a>
-                      <button class="btn btn-outline btn-sm" onclick="toast('Membuka data peserta ERM','info')">Lihat Peserta</button>
-                      <button class="btn btn-ghost btn-sm" onclick="toast('Membuka bank soal ERM','info')">Bank Soal</button>
+                      <button class="btn btn-outline btn-sm" onclick="showInstructorParticipants('ERM Fundamental')">Lihat Peserta</button>
+                      <button class="btn btn-ghost btn-sm" onclick="showInstructorQuestionBank('ERM Fundamental')">Bank Soal</button>
                     </div>
                   </div>
                 </div>
@@ -654,9 +727,9 @@
                       </div>
                     </div>
                     <div class="prog-actions">
-                      <button class="btn btn-primary btn-sm" onclick="toast('Kelola modul audit','info')">Kelola Modul</button>
-                      <button class="btn btn-outline btn-sm" onclick="toast('Membuka data peserta Audit','info')">Lihat Peserta</button>
-                      <button class="btn btn-ghost btn-sm" onclick="toast('Membuka bank soal Audit','info')">Bank Soal</button>
+                      <button class="btn btn-primary btn-sm" onclick="openInstructorWorkPanel('Kelola Modul Audit','Modul audit terhubung ke halaman admin Modul & Materi. Instruktur dapat menyiapkan catatan pembelajaran dan progres review di sini.')">Kelola Modul</button>
+                      <button class="btn btn-outline btn-sm" onclick="showInstructorParticipants('Internal Audit')">Lihat Peserta</button>
+                      <button class="btn btn-ghost btn-sm" onclick="showInstructorQuestionBank('Internal Audit')">Bank Soal</button>
                     </div>
                   </div>
                 </div>
@@ -752,16 +825,28 @@
               </div>
             </div><!-- /aktivitas -->
 
+            <!-- Data peserta terhubung dari admin -->
+            <div class="section-card" id="instructorParticipantPanel">
+              <div class="section-head">
+                <div>
+                  <div class="section-title">Data Peserta Terhubung</div>
+                  <div style="font-size:.8rem;color:var(--text-xs);margin-top:4px;" id="instructorParticipantSub">Sinkron dari dashboard admin.</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="showInstructorParticipants()">Refresh</button>
+              </div>
+              <div class="activity-list" id="instructorParticipantList"></div>
+            </div><!-- /data peserta -->
+
           </div><!-- /left col -->
 
           <!-- Right Column -->
           <div class="instr-right-col">
 
             <!-- Jadwal Sesi Live -->
-            <div class="section-card-sm">
+            <div class="section-card-sm" id="instructorSchedulePanel">
               <div class="section-head">
                 <div class="section-title-sm">Sesi Live Mendatang</div>
-                <button class="btn btn-ghost btn-sm" onclick="toast('Membuka kalender sesi','info')">Lihat Semua</button>
+                <button class="btn btn-ghost btn-sm" onclick="openInstructorWorkPanel('Kalender Sesi Live','Semua sesi live instruktur ditampilkan di panel ini. Gunakan tombol edit untuk memperbarui agenda.')">Lihat Semua</button>
               </div>
 
               <div class="schedule-item">
@@ -774,8 +859,8 @@
                   <div class="sched-sub">ERM Fundamental · 19.00–20.30 WIB</div>
                   <div class="sched-count">42 peserta terdaftar</div>
                   <div class="sched-btns">
-                    <button class="btn btn-primary btn-sm" onclick="toast('Membuka Zoom meeting','info')">Mulai Zoom</button>
-                    <button class="btn btn-ghost btn-sm" onclick="toast('Edit jadwal sesi','info')">Edit</button>
+                    <button class="btn btn-primary btn-sm" onclick="openInstructorWorkPanel('Mulai Zoom','Link meeting demo siap dibuka. Pada produksi tombol ini akan membuka Zoom atau platform live class.')">Mulai Zoom</button>
+                    <button class="btn btn-ghost btn-sm" onclick="openInstructorWorkPanel('Edit Jadwal Sesi','Perbarui tanggal, jam, topik, dan kuota peserta sesi live.')">Edit</button>
                   </div>
                 </div>
               </div>
@@ -790,8 +875,8 @@
                   <div class="sched-sub">ERM Fundamental · 09.00–12.00 WIB</div>
                   <div class="sched-count">67 peserta terdaftar</div>
                   <div class="sched-btns">
-                    <button class="btn btn-outline btn-sm" onclick="toast('Jadwal belum mulai','info')">Persiapan</button>
-                    <button class="btn btn-ghost btn-sm" onclick="toast('Edit jadwal sesi','info')">Edit</button>
+                    <button class="btn btn-outline btn-sm" onclick="openInstructorWorkPanel('Persiapan Sesi','Checklist sesi, materi pendukung, dan link meeting siap dikelola pada panel ini.')">Persiapan</button>
+                    <button class="btn btn-ghost btn-sm" onclick="openInstructorWorkPanel('Edit Jadwal Sesi','Perbarui tanggal, jam, topik, dan kuota peserta sesi live.')">Edit</button>
                   </div>
                 </div>
               </div>
@@ -806,19 +891,19 @@
                   <div class="sched-sub">Semua peserta · 14.00–16.00 WIB</div>
                   <div class="sched-count">128 peserta terdaftar</div>
                   <div class="sched-btns">
-                    <button class="btn btn-outline btn-sm" onclick="toast('Persiapan webinar','info')">Persiapan</button>
+                    <button class="btn btn-outline btn-sm" onclick="openInstructorWorkPanel('Persiapan Webinar','Atur rundown, materi, dan pengumuman peserta webinar.')">Persiapan</button>
                   </div>
                 </div>
               </div>
 
-              <button class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center;display:flex;align-items:center;gap:6px;" onclick="toast('Membuat jadwal sesi baru','info')">
+              <button class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center;display:flex;align-items:center;gap:6px;" onclick="openInstructorWorkPanel('Buat Sesi Live Baru','Isi topik, program, jadwal, dan catatan sesi. Data tersimpan sebagai simulasi lokal.')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Buat Sesi Live Baru
               </button>
             </div><!-- /jadwal -->
 
             <!-- Pesan Masuk -->
-            <div class="section-card-sm">
+            <div class="section-card-sm" id="instructorMessagePanel">
               <div class="section-head">
                 <div class="section-title-sm">Pesan Masuk</div>
                 <span class="badge badge-danger" style="font-size:.7rem;">4 baru</span>
@@ -834,7 +919,7 @@
                   <div class="msg-snippet">Pak, apakah residual risk bisa nol jika...</div>
                   <div class="msg-meta">2 jam lalu · ERM Modul 6</div>
                 </div>
-                <button class="btn btn-ghost btn-sm" onclick="toast('Membuka pesan Ahmad','info')">Balas</button>
+                <button class="btn btn-ghost btn-sm" onclick="openReplyPanel('Ahmad Fauzi')">Balas</button>
               </div>
 
               <div class="msg-item">
@@ -847,7 +932,7 @@
                   <div class="msg-snippet">Pak saya bingung dengan perbedaan risk...</div>
                   <div class="msg-meta">5 jam lalu · ERM Modul 3</div>
                 </div>
-                <button class="btn btn-ghost btn-sm" onclick="toast('Membuka pesan Reza','info')">Balas</button>
+                <button class="btn btn-ghost btn-sm" onclick="openReplyPanel('Reza Putra')">Balas</button>
               </div>
 
               <div class="msg-item">
@@ -860,7 +945,7 @@
                   <div class="msg-snippet">Pak saya tidak lulus ujian, boleh minta...</div>
                   <div class="msg-meta">1 hari lalu · Internal Audit</div>
                 </div>
-                <button class="btn btn-ghost btn-sm" onclick="toast('Membuka pesan Hendra','info')">Balas</button>
+                <button class="btn btn-ghost btn-sm" onclick="openReplyPanel('Hendra Wijaya')">Balas</button>
               </div>
 
               <div class="msg-item">
@@ -872,7 +957,7 @@
                   <div class="msg-snippet">Terima kasih Pak atas penjelasannya...</div>
                   <div class="msg-meta">2 hari lalu · ERM Modul 4</div>
                 </div>
-                <button class="btn btn-ghost btn-sm" onclick="toast('Membuka pesan Dewi','info')">Lihat</button>
+                <button class="btn btn-ghost btn-sm" onclick="openReplyPanel('Dewi Anggraini')">Lihat</button>
               </div>
 
             </div><!-- /pesan -->
@@ -914,6 +999,19 @@
 </div><!-- /app-layout -->
 
 <div class="toast-container"></div>
+<div class="instr-modal" id="instructorModal" aria-hidden="true">
+  <div class="instr-modal-card" role="dialog" aria-modal="true" aria-labelledby="instructorModalTitle">
+    <div class="instr-modal-head">
+      <div class="instr-modal-title" id="instructorModalTitle">Aksi Instruktur</div>
+      <button class="instr-modal-close" onclick="closeInstructorModal()" aria-label="Tutup">×</button>
+    </div>
+    <div class="instr-modal-body" id="instructorModalBody"></div>
+    <div class="instr-modal-actions" id="instructorModalActions">
+      <button class="btn btn-ghost btn-sm" onclick="closeInstructorModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+<script src="js/admin-data.js"></script>
 <script>
 function toast(msg, type) {
   const t = document.createElement('div');
@@ -923,8 +1021,172 @@ function toast(msg, type) {
   requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
 }
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
+
+function openInstructorModal(title, body, actions) {
+  document.getElementById('instructorModalTitle').textContent = title;
+  document.getElementById('instructorModalBody').innerHTML = body;
+  document.getElementById('instructorModalActions').innerHTML = actions || `
+    <button class="btn btn-ghost btn-sm" onclick="closeInstructorModal()">Tutup</button>
+    <button class="btn btn-primary btn-sm" onclick="saveInstructorModal()">Simpan</button>
+  `;
+  document.getElementById('instructorModal').classList.add('show');
+  document.getElementById('instructorModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeInstructorModal() {
+  document.getElementById('instructorModal').classList.remove('show');
+  document.getElementById('instructorModal').setAttribute('aria-hidden', 'true');
+}
+
+function saveInstructorModal(message = 'Data instruktur berhasil disimpan.') {
+  closeInstructorModal();
+  toast(message, 'success');
+}
+
+function openInstructorWorkPanel(title, note) {
+  openInstructorModal(title, `
+    <div class="instr-note">${escapeHtml(note)}</div>
+    <div class="instr-field"><label>Judul / Topik</label><input id="instrWorkTitle" value="${escapeHtml(title)}"></div>
+    <div class="instr-field"><label>Catatan</label><textarea placeholder="Tulis catatan tindak lanjut"></textarea></div>
+    <div class="instr-field"><label>Status</label><select><option>Siap</option><option>Draft</option><option>Butuh Review Admin</option></select></div>
+  `);
+}
+
+function openReplyPanel(studentName) {
+  openInstructorModal('Balas Pesan Peserta', `
+    <div class="instr-note">Balasan untuk ${escapeHtml(studentName)} akan tercatat sebagai simulasi lokal.</div>
+    <div class="instr-field"><label>Peserta</label><input value="${escapeHtml(studentName)}" readonly></div>
+    <div class="instr-field"><label>Balasan</label><textarea id="replyText">Terima kasih, saya bantu jelaskan. Silakan cek kembali materi terkait dan kirim pertanyaan lanjutan bila masih ada bagian yang membingungkan.</textarea></div>
+  `, `
+    <button class="btn btn-ghost btn-sm" onclick="closeInstructorModal()">Batal</button>
+    <button class="btn btn-primary btn-sm" onclick="saveInstructorModal('Balasan peserta berhasil disimpan.')">Kirim Balasan</button>
+  `);
+}
+
+function showInstructorQuestionBank(programName) {
+  const data = window.GRCCAdminData;
+  const questions = data ? data.getQuestions() : [];
+  const modules = data ? data.getModules().filter((module) => !programName || data.normalizeName(module.program).includes(data.normalizeName(programName))) : [];
+  const moduleIds = modules.map((module) => module.id);
+  const filtered = questions.filter((question) => !programName || moduleIds.includes(question.moduleId));
+  openInstructorModal('Bank Soal Instruktur', `
+    <div class="instr-note">${escapeHtml(programName || 'Semua program')} · ${filtered.length} soal tersambung dari Bank Soal Admin.</div>
+    <div style="display:grid;gap:10px;margin-top:12px;">
+      ${(filtered.length ? filtered : questions).slice(0, 8).map((question) => `
+        <div style="border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <strong style="color:var(--navy);font-size:.82rem;">${escapeHtml(question.id)} · ${escapeHtml(question.exam)}</strong>
+            <span class="badge badge-teal" style="font-size:.65rem;">${escapeHtml(question.type)}</span>
+          </div>
+          <div style="font-size:.82rem;color:var(--text-sm);line-height:1.5;margin-top:6px;">${escapeHtml(question.question)}</div>
+        </div>
+      `).join('') || '<div class="instr-note">Belum ada soal untuk program ini.</div>'}
+    </div>
+  `, `
+    <button class="btn btn-ghost btn-sm" onclick="closeInstructorModal()">Tutup</button>
+    <a class="btn btn-primary btn-sm" href="admin.html#soal">Kelola di Admin</a>
+  `);
+}
+
 function showTab(tab) {
-  toast('Fitur ' + tab + ' segera hadir', 'info');
+  if (tab === 'peserta') {
+    showInstructorParticipants();
+    return;
+  }
+  if (tab === 'program') {
+    document.getElementById('instructorProgramPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return toast('Program Saya ditampilkan.', 'success');
+  }
+  if (tab === 'soal') return showInstructorQuestionBank();
+  if (tab === 'nilai') {
+    document.getElementById('instructorParticipantPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return toast('Nilai peserta tersambung dari data peserta.', 'success');
+  }
+  if (tab === 'jadwal') {
+    document.getElementById('instructorSchedulePanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return toast('Jadwal sesi live ditampilkan.', 'success');
+  }
+  if (tab === 'pesan') {
+    document.getElementById('instructorMessagePanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return toast('Pesan peserta ditampilkan.', 'success');
+  }
+  toast('Fitur ' + tab + ' siap digunakan.', 'info');
+}
+
+function getStoredValue(key, fallback) {
+  try {
+    return localStorage.getItem(key) || fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function removeStoredValue(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {}
+}
+
+function initialsFromName(name) {
+  return String(name || '')
+    .replace(/,\s*[^,]+$/g, '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase() || 'NA';
+}
+
+function getInstructorContext() {
+  const data = window.GRCCAdminData;
+  if (!data) return { instructor: null, participants: [] };
+  const savedName = getStoredValue('grcc_name', 'Dr. Hendri Kurniawan');
+  const instructors = data.getInstructorSummary();
+  const instructor = instructors.find((item) => item.name === savedName) || instructors[0];
+  return {
+    instructor,
+    participants: instructor ? data.getParticipantsForInstructor(instructor.id) : [],
+  };
+}
+
+function showInstructorParticipants(programName, silent) {
+  const { instructor, participants } = getInstructorContext();
+  const list = document.getElementById('instructorParticipantList');
+  const sub = document.getElementById('instructorParticipantSub');
+  if (!list) return;
+  const filtered = programName ? participants.filter((participant) => participant.program === programName) : participants;
+  if (sub) {
+    const label = programName || (instructor ? instructor.programs.join(', ') : 'Program');
+    sub.textContent = `${filtered.length} peserta ${label} tersambung dari dashboard admin.`;
+  }
+  list.innerHTML = filtered.map((participant) => `
+    <div class="stu-row">
+      <div class="stu-avatar" style="background:var(--teal);">${initialsFromName(participant.name)}</div>
+      <div class="stu-info">
+        <div class="stu-name">${participant.name}</div>
+        <div class="stu-action">${participant.program} · ${participant.institution}</div>
+      </div>
+      <div class="stu-right">
+        <div class="stu-time">${participant.progress}%</div>
+        <span class="badge ${participant.status === 'Menunggu' ? 'badge-gold' : participant.status === 'Remedial' ? 'badge-danger' : 'badge-success'}" style="font-size:.65rem;">${participant.status}</span>
+      </div>
+    </div>
+  `).join('') || '<div style="font-size:.85rem;color:var(--text-xs);padding:6px 0;">Belum ada peserta yang terhubung.</div>';
+  if (!silent) {
+    document.getElementById('instructorParticipantPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    toast('Data peserta instruktur sudah disinkronkan', 'success');
+  }
 }
 
 // Dynamic greeting and date
@@ -944,8 +1206,8 @@ function showTab(tab) {
 
 // ── Role-aware navigation ──
 (function() {
-  const role = localStorage.getItem('grcc_role') || 'instruktur';
-  const name = localStorage.getItem('grcc_name') || 'Dr. Hendri Kurniawan';
+  const role = getStoredValue('grcc_role', 'instruktur');
+  const name = getStoredValue('grcc_name', 'Dr. Hendri Kurniawan');
   // Redirect non-instruktur users to their own dashboard
   if (role === 'peserta') { window.location.replace('dashboard.html'); return; }
   if (role === 'admin')   { window.location.replace('admin.html'); return; }
@@ -955,13 +1217,14 @@ function showTab(tab) {
   document.querySelectorAll('a[href="login.html"]').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
-      localStorage.removeItem('grcc_role');
-      localStorage.removeItem('grcc_name');
-      localStorage.removeItem('grcc_email');
-      localStorage.removeItem('grcc_user_key');
+      removeStoredValue('grcc_role');
+      removeStoredValue('grcc_name');
+      removeStoredValue('grcc_email');
+      removeStoredValue('grcc_user_key');
       window.location.href='login.html';
     });
   });
+  showInstructorParticipants(null, true);
 })();
 </script>
 </body>

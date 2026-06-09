@@ -289,8 +289,40 @@
     { code: 'GCG-BASIC', progress: 100, currentModule: 6, status: 'done', completedModules: [1, 2, 3, 4, 5, 6], quizPassed: true, finalPassed: true, certificateIssued: true, finalScore: 92 },
   ];
 
+  const ADMIN_PARTICIPANT_KEY = 'grcc_admin_participants';
+
+  const ADMIN_PROGRAM_NAMES = {
+    'ERM-2026': 'ERM Fundamental',
+    'COMP-REG': 'Compliance Management',
+    'GCG-BASIC': 'GRC for Government',
+    'ISO-31000': 'ERM Fundamental',
+    'AML-2026': 'Compliance Management',
+    'ESG-GRCC': 'ESG & Keberlanjutan',
+    'ITHD-2026': 'GRC for Government',
+    'OPS-RISK': 'ERM Fundamental',
+    'AUDIT-INT': 'Internal Audit',
+    TAXRISK: 'Compliance Management',
+    'FRAUD-GRC': 'Compliance Management',
+    'BCMS-ISO': 'ERM Fundamental',
+  };
+
   function getProgram(code) {
     return PROGRAMS.find((program) => program.code === code) || null;
+  }
+
+  function safeReadJson(key, fallback) {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(key) || 'null');
+      return Array.isArray(parsed) ? parsed : fallback;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function safeWriteJson(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {}
   }
 
   function getProgramModules(code) {
@@ -364,6 +396,45 @@
     localStorage.setItem(getEnrollmentKey(), JSON.stringify(enrollments.map(normalizeEnrollment)));
   }
 
+  function adminProgramName(code) {
+    return ADMIN_PROGRAM_NAMES[code] || getProgram(code)?.title || code;
+  }
+
+  function adminInstructorId(programName) {
+    const value = String(programName || '').toLowerCase();
+    if (value.includes('audit')) return 'i-ratna';
+    if (value.includes('compliance') || value.includes('kepatuhan') || value.includes('aml') || value.includes('fraud')) return 'i-maya';
+    return 'i-hendri';
+  }
+
+  function syncEnrollmentToAdmin(enrollment, statusOverride) {
+    const email = (localStorage.getItem('grcc_email') || localStorage.getItem('grcc_user_key') || 'peserta@grcc.id').toLowerCase();
+    const name = localStorage.getItem('grcc_name') || 'Peserta GRCC';
+    const programName = adminProgramName(enrollment.code);
+    const participants = safeReadJson(ADMIN_PARTICIPANT_KEY, []);
+    const id = `p-${email.replace(/[^a-z0-9]+/g, '-')}-${enrollment.code.toLowerCase()}`;
+    const status = statusOverride
+      || (enrollment.certificateIssued ? 'Lulus' : enrollment.progress > 0 ? 'Aktif' : 'Menunggu');
+    const patch = {
+      id,
+      name,
+      email,
+      institution: localStorage.getItem('grcc_institution') || 'Individual',
+      program: programName,
+      instructorId: adminInstructorId(programName),
+      progress: Number(enrollment.progress || 0),
+      status,
+      joined: new Date(enrollment.enrolledAt || Date.now()).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+      certificateIssued: Boolean(enrollment.certificateIssued),
+      certificateIssuedAt: enrollment.certificateIssuedAt || null,
+    };
+    const index = participants.findIndex((participant) => participant.id === id || (String(participant.email || '').toLowerCase() === email && participant.program === programName));
+    if (index >= 0) participants[index] = { ...participants[index], ...patch };
+    else participants.unshift(patch);
+    safeWriteJson(ADMIN_PARTICIPANT_KEY, participants);
+    return patch;
+  }
+
   function isEnrolled(code) {
     return getEnrolled().some((enrollment) => enrollment.code === code);
   }
@@ -381,6 +452,7 @@
       status: 'active',
     }));
     saveEnrolled(next);
+    syncEnrollmentToAdmin(next[next.length - 1], 'Menunggu');
     return true;
   }
 
@@ -393,6 +465,7 @@
     const updated = normalizeEnrollment(typeof updater === 'function' ? updater(draft) : { ...draft, ...updater });
     next[idx] = updated;
     saveEnrolled(next);
+    syncEnrollmentToAdmin(updated);
     return updated;
   }
 

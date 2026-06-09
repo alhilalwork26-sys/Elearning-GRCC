@@ -37,7 +37,7 @@
           <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" class="form-control" placeholder="Cari program, topik, instruktur..." id="searchInput">
         </div>
-        <button class="btn btn-primary">Cari Program</button>
+        <button class="btn btn-primary" id="catalogSearchBtn">Cari Program</button>
       </div>
     </div>
   </div>
@@ -88,7 +88,7 @@
             <div class="filter-option"><input type="radio" name="dur" id="d3"><label for="d3">10–24 jam</label></div>
             <div class="filter-option"><input type="radio" name="dur" id="d4"><label for="d4">24 jam ke atas</label></div>
           </div>
-          <button class="btn btn-ghost w-full" style="justify-content:center;">Reset Filter</button>
+          <button class="btn btn-ghost w-full" id="catalogResetBtn" style="justify-content:center;">Reset Filter</button>
         </aside>
 
         <!-- Program grid -->
@@ -225,7 +225,7 @@
             </div>
           </div>
           <div style="text-align:center;margin-top:32px;">
-            <button class="btn btn-outline btn-lg" onclick="showToast('Memuat lebih banyak program...','info')">Muat Lebih Banyak Program</button>
+            <button class="btn btn-outline btn-lg" id="catalogLoadMoreBtn">Muat Lebih Banyak Program</button>
           </div>
         </div>
       </div>
@@ -248,25 +248,97 @@
   <script src="js/main.js"></script>
   <script>
     window.addEventListener('scroll', () => document.getElementById('topnav').classList.toggle('scrolled', window.scrollY > 20));
+    const extraPrograms = [
+      { cat: 'risk', badge: 'badge-gold', title: 'Operational Risk & KRI', desc: 'RCSA, KRI, loss event database, dan pelaporan risiko operasional.', meta: ['18 Jam','6 Modul','Risk Officer'], level: 'Menengah' },
+      { cat: 'compliance', badge: 'badge-teal', title: 'AML & KYC Praktis', desc: 'Customer due diligence, transaction monitoring, dan pelaporan STR/CTR.', meta: ['21 Jam','7 Modul','Bank & Fintech'], level: 'Menengah' },
+      { cat: 'governance', badge: 'badge-info', title: 'Board Governance Essentials', desc: 'Peran komisaris, direksi, komite, dan tata kelola pengambilan keputusan.', meta: ['12 Jam','4 Modul','Executive'], level: 'Pemula' },
+      { cat: 'sertifikasi', badge: 'badge-navy', title: 'CRMP Certification Prep', desc: 'Latihan soal, pembahasan studi kasus, dan simulasi ujian sertifikasi.', meta: ['30 Jam','10 Modul','Profesional'], level: 'Lanjutan' },
+    ];
+
+    function getActiveCategory() {
+      return document.querySelector('.filter-pill.active')?.getAttribute('data-cat') || 'all';
+    }
+
+    function selectedLevels() {
+      return [...document.querySelectorAll('.catalog-sidebar input[type="checkbox"]:checked')]
+        .map(input => input.nextElementSibling?.textContent.trim().toLowerCase())
+        .filter(Boolean);
+    }
+
+    function applyCatalogFilters() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const cat = getActiveCategory();
+      const levels = selectedLevels();
+      let visible = 0;
+      document.querySelectorAll('.prog-card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const level = card.querySelector('.prog-card-footer .badge')?.textContent.trim().toLowerCase() || '';
+        const matchCat = !cat || cat === 'all' || card.getAttribute('data-cat') === cat;
+        const matchSearch = !q || text.includes(q);
+        const matchLevel = !levels.length || levels.some(item => level.includes(item));
+        const show = matchCat && matchSearch && matchLevel;
+        card.style.display = show ? '' : 'none';
+        if (show) visible += 1;
+      });
+      const counter = document.querySelector('.catalog-content strong');
+      if (counter) counter.textContent = visible;
+    }
+
+    function renderExtraPrograms() {
+      const grid = document.getElementById('programsGrid');
+      if (!grid || grid.dataset.loadedExtra === 'true') return false;
+      grid.dataset.loadedExtra = 'true';
+      grid.insertAdjacentHTML('beforeend', extraPrograms.map(item => `
+        <div class="prog-card" data-cat="${item.cat}">
+          <div class="prog-card-header" style="background:linear-gradient(135deg,#F8FAFC,#E2E8F0);">
+            <span class="prog-emoji">📘</span>
+            <div class="prog-card-cat"><span class="badge ${item.badge}">${item.cat}</span></div>
+          </div>
+          <div class="prog-card-body">
+            <h3 class="prog-card-title">${item.title}</h3>
+            <p class="prog-card-desc">${item.desc}</p>
+            <div class="prog-card-meta">${item.meta.map(meta => `<span class="prog-meta-item">${meta}</span>`).join('')}</div>
+          </div>
+          <div class="prog-card-footer">
+            <span class="badge badge-info">${item.level}</span>
+            <a href="program-detail.html" class="btn btn-primary btn-sm">Lihat Detail</a>
+          </div>
+        </div>
+      `).join(''));
+      return true;
+    }
+
     // Filter
     document.querySelectorAll('.filter-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
-        const cat = pill.getAttribute('data-cat');
-        document.querySelectorAll('.prog-card').forEach(card => {
-          card.style.display = (!cat || cat === 'all' || card.getAttribute('data-cat') === cat) ? '' : 'none';
-        });
+        applyCatalogFilters();
       });
     });
     // Search
-    document.getElementById('searchInput').addEventListener('input', e => {
-      const q = e.target.value.toLowerCase();
-      document.querySelectorAll('.prog-card').forEach(card => {
-        const text = card.textContent.toLowerCase();
-        card.style.display = text.includes(q) ? '' : 'none';
-      });
+    document.getElementById('searchInput').addEventListener('input', applyCatalogFilters);
+    document.getElementById('catalogSearchBtn')?.addEventListener('click', applyCatalogFilters);
+    document.querySelectorAll('.catalog-sidebar input').forEach(input => {
+      input.addEventListener('change', applyCatalogFilters);
     });
+    document.getElementById('catalogResetBtn')?.addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === 'all'));
+      document.querySelectorAll('.catalog-sidebar input[type="checkbox"]').forEach(input => { input.checked = true; });
+      document.getElementById('d1').checked = true;
+      applyCatalogFilters();
+      showToast('Filter katalog direset.', 'success');
+    });
+    document.getElementById('catalogLoadMoreBtn')?.addEventListener('click', () => {
+      if (renderExtraPrograms()) {
+        applyCatalogFilters();
+        showToast('Program tambahan berhasil dimuat.', 'success');
+        return;
+      }
+      showToast('Semua program demo sudah ditampilkan.', 'info');
+    });
+    applyCatalogFilters();
     function showToast(msg, type) {
       const t = document.createElement('div');
       t.className = `toast toast-${type}`;

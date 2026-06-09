@@ -474,6 +474,88 @@
     /* Soal type badge stats */
     .soal-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 
+    /* ─── Admin modal / action surface ─────────────────────── */
+    .admin-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(7,24,48,.48);
+    }
+    .admin-modal.show { display: flex; }
+    .admin-modal-card {
+      width: min(520px, 100%);
+      max-height: min(720px, calc(100vh - 40px));
+      overflow: auto;
+      background: var(--white);
+      border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--sh-lg);
+    }
+    .admin-modal-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .admin-modal-title { font-family: var(--font-h); font-weight: 800; color: var(--navy); }
+    .admin-modal-close {
+      border: 0;
+      background: var(--bg);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      color: var(--text-sm);
+      font-size: 1rem;
+    }
+    .admin-modal-body { padding: 20px; }
+    .admin-modal-note {
+      padding: 12px 14px;
+      border-radius: var(--r-md);
+      background: var(--bg);
+      color: var(--text-sm);
+      font-size: .85rem;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+    .admin-form-grid { display: grid; gap: 12px; }
+    .admin-field label {
+      display: block;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 800;
+      color: var(--text-xs);
+      margin-bottom: 6px;
+    }
+    .admin-field input,
+    .admin-field select,
+    .admin-field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--white);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+    .admin-field textarea { min-height: 88px; resize: vertical; }
+    .admin-modal-actions {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     /* ─── Responsive ─────────────────────────────────────────── */
     @media (max-width: 1100px) {
       .stat-grid { grid-template-columns: repeat(2, 1fr); }
@@ -524,7 +606,7 @@
       <a class="admin-link" href="#peserta" onclick="showSection('peserta')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Data Peserta
-        <span class="badge-dot">3</span>
+        <span class="badge-dot" id="adminPendingBadge">3</span>
       </a>
 
       <a class="admin-link" href="#program" onclick="showSection('program')">
@@ -547,6 +629,11 @@
       <a class="admin-link" href="#progress" onclick="showSection('progress')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Progress Peserta
+      </a>
+
+      <a class="admin-link" href="#instruktur" onclick="showSection('instruktur')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        Instruktur
       </a>
 
       <a class="admin-link" href="#nilai" onclick="showSection('nilai')">
@@ -603,7 +690,7 @@
       <div id="admin-page-title" class="admin-topbar-title">Dashboard Admin</div>
 
       <div class="admin-topbar-actions">
-        <button onclick="showToast('Laporan sedang diunduh...','info')" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;">
+        <button onclick="event.stopPropagation(); exportDemoReport(document.getElementById('admin-page-title').textContent,'CSV')" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Ekspor
         </button>
@@ -822,7 +909,7 @@
                 <th>Aksi</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="participantTableBody">
               <tr>
                 <td>
                   <div class="td-name-cell">
@@ -936,7 +1023,7 @@
             </div>
             <div>
               <div class="section-title">Data Peserta</div>
-              <div class="section-sub">1.284 peserta terdaftar · 3 menunggu verifikasi</div>
+              <div class="section-sub" id="adminParticipantSummary">1.284 peserta terdaftar · 3 menunggu verifikasi</div>
             </div>
           </div>
           <div class="section-header-right">
@@ -949,10 +1036,11 @@
                 <option>Semua Status</option>
                 <option>Aktif</option>
                 <option>Menunggu</option>
-                <option>Selesai</option>
+                <option>Lulus</option>
+                <option>Remedial</option>
                 <option>Ditolak</option>
               </select>
-              <button class="btn btn-primary btn-sm" onclick="showToast('Tambah peserta manual','info')" style="display:flex;align-items:center;gap:5px;">
+              <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openCreatePanel('peserta')" style="display:flex;align-items:center;gap:5px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Tambah Peserta
               </button>
@@ -1132,11 +1220,11 @@
             </div>
             <div>
               <div class="section-title">Manajemen Program</div>
-              <div class="section-sub">16 program aktif · 2 draft · 3 arsip</div>
+              <div class="section-sub" id="adminProgramSummary">16 program aktif · 2 draft · 3 arsip</div>
             </div>
           </div>
           <div class="section-header-right">
-            <button class="btn btn-primary btn-sm" onclick="showToast('Membuka form program baru','info')" style="display:flex;align-items:center;gap:5px;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openCreatePanel('program')" style="display:flex;align-items:center;gap:5px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Tambah Program
             </button>
@@ -1149,6 +1237,7 @@
               <tr>
                 <th>Nama Program</th>
                 <th>Kategori</th>
+                <th>Instruktur</th>
                 <th>Modul</th>
                 <th>Peserta</th>
                 <th>Lulus</th>
@@ -1156,7 +1245,7 @@
                 <th>Aksi</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="programTableBody">
               <tr>
                 <td class="td-primary">ERM Fundamental</td>
                 <td>Risk Management</td><td>8 modul</td><td>428</td><td>389 (91%)</td>
@@ -1210,15 +1299,15 @@
             </div>
             <div>
               <div class="section-title">Modul &amp; Materi</div>
-              <div class="section-sub">Kelola modul pembelajaran dan unggah file materi</div>
+              <div class="section-sub" id="adminModuleSummary">Kelola modul pembelajaran dan unggah file materi</div>
             </div>
           </div>
           <div class="section-header-right">
-            <button class="btn btn-outline btn-sm" onclick="showToast('Membuka panel unggah file','info')" style="display:flex;align-items:center;gap:5px;">
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openModuleFilePicker()" style="display:flex;align-items:center;gap:5px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Unggah Materi
             </button>
-            <button class="btn btn-primary btn-sm" onclick="showToast('Membuka form modul baru','info')" style="display:flex;align-items:center;gap:5px;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openCreatePanel('modul')" style="display:flex;align-items:center;gap:5px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Tambah Modul
             </button>
@@ -1238,7 +1327,7 @@
                 <th>Aksi</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="moduleTableBody">
               <tr>
                 <td class="td-primary">Pengantar GRC &amp; Kerangka Kerja</td>
                 <td>ERM Fundamental</td><td>Modul 1</td><td>PDF, PPTX</td><td>428 peserta</td>
@@ -1273,7 +1362,7 @@
                 <td class="td-primary">Studi Kasus ERM Indonesia</td>
                 <td>ERM Fundamental</td><td>Modul 8</td><td>—</td><td>0 peserta</td>
                 <td><span class="badge badge-gold">Draft</span></td>
-                <td><button class="btn btn-outline btn-sm" onclick="showToast('Unggah file modul 8','info')">Unggah File</button></td>
+                <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openModuleFilePanel(this.closest('tr'))">Unggah File</button></td>
               </tr>
             </tbody>
           </table>
@@ -1296,18 +1385,18 @@
             </div>
           </div>
           <div class="section-header-right">
-            <button class="btn btn-primary btn-sm" onclick="showToast('Membuka form tambah soal baru','info')" style="display:flex;align-items:center;gap:5px;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openCreatePanel('soal')" style="display:flex;align-items:center;gap:5px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Tambah Soal
             </button>
           </div>
         </div>
 
-        <div class="soal-stats">
-          <span class="badge badge-success" style="padding:6px 14px;font-size:.8rem;">Quiz: 40 soal</span>
-          <span class="badge badge-teal" style="padding:6px 14px;font-size:.8rem;">Pre-Test: 20 soal</span>
-          <span class="badge badge-gold" style="padding:6px 14px;font-size:.8rem;">Post-Test: 30 soal</span>
-          <span class="badge" style="padding:6px 14px;font-size:.8rem;background:var(--navy);color:white;">Final Exam: 50 soal</span>
+        <div class="soal-stats" id="questionStats">
+          <span class="badge badge-success" style="padding:6px 14px;font-size:.8rem;">Quiz: 0 soal</span>
+          <span class="badge badge-teal" style="padding:6px 14px;font-size:.8rem;">Pre-Test: 0 soal</span>
+          <span class="badge badge-gold" style="padding:6px 14px;font-size:.8rem;">Post-Test: 0 soal</span>
+          <span class="badge" style="padding:6px 14px;font-size:.8rem;background:var(--navy);color:white;">Final Exam: 0 soal</span>
         </div>
 
         <div class="table-panel">
@@ -1323,7 +1412,7 @@
                 <th>Aksi</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="questionTableBody">
               <tr>
                 <td style="font-family:monospace;font-size:.8rem;color:var(--navy);">Q-001</td>
                 <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Perusahaan X mengidentifikasi risiko dengan Risk Score = 16...</td>
@@ -1484,6 +1573,80 @@
 
 
       <!-- ════════════════════════════════════════════════════ -->
+      <!--  INSTRUKTUR                                        -->
+      <!-- ════════════════════════════════════════════════════ -->
+      <div id="section-instruktur" class="admin-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <div class="section-icon-box" style="background:#EEF2FF;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" width="22" height="22"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <div>
+              <div class="section-title">Manajemen Instruktur</div>
+              <div class="section-sub">Pantau pengajar, program yang diampu, dan peserta yang terhubung.</div>
+            </div>
+          </div>
+          <div class="section-header-right">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openCreatePanel('instruktur')" style="display:flex;align-items:center;gap:5px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Instruktur
+            </button>
+          </div>
+        </div>
+
+        <div class="table-panel" style="margin-bottom:18px;">
+          <div class="table-panel-head">
+            <div>
+              <div class="table-panel-head-title">Koneksi Instruktur &amp; Peserta</div>
+              <div class="table-panel-head-sub">Data diambil dari sumber yang sama dengan Data Peserta.</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="renderAdminInstructorRows()">Sinkronkan</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Instruktur</th>
+                <th>Program</th>
+                <th>Peserta</th>
+                <th>Menunggu</th>
+                <th>Rata-rata Progress</th>
+                <th>Rating</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="adminInstructorRows"></tbody>
+          </table>
+        </div>
+
+        <div class="table-panel">
+          <div class="table-panel-head">
+            <div>
+              <div class="table-panel-head-title" id="adminInstructorDetailTitle">Peserta per Instruktur</div>
+              <div class="table-panel-head-sub" id="adminInstructorDetailSub">Pilih Lihat Peserta untuk melihat daftar peserta yang diampu.</div>
+            </div>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Peserta</th>
+                <th>Institusi</th>
+                <th>Program</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th>Sertifikat</th>
+              </tr>
+            </thead>
+            <tbody id="adminInstructorParticipants">
+              <tr>
+                <td colspan="6" style="color:var(--text-xs);font-size:.85rem;">Belum ada instruktur yang dipilih.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /section-instruktur -->
+
+
+      <!-- ════════════════════════════════════════════════════ -->
       <!--  NILAI                                             -->
       <!-- ════════════════════════════════════════════════════ -->
       <div id="section-nilai" class="admin-section">
@@ -1498,7 +1661,7 @@
             </div>
           </div>
           <div class="section-header-right">
-            <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh rekap nilai CSV','info')" style="display:flex;align-items:center;gap:5px;">
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('rekap nilai','CSV')" style="display:flex;align-items:center;gap:5px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Unduh Rekap
             </button>
@@ -1554,7 +1717,7 @@
                 <td>Internal Audit</td><td>68</td><td>82</td><td>58</td>
                 <td><strong style="color:var(--danger);font-size:.95rem;">58</strong></td>
                 <td><span class="badge badge-danger">TIDAK LULUS</span></td>
-                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Izin ujian ulang diberikan','success')">Izin Ujian Ulang</button></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showToast('Izin ujian ulang diberikan','success')">Izin Ujian Ulang</button></td>
               </tr>
               <tr>
                 <td>
@@ -1601,7 +1764,7 @@
             </div>
           </div>
           <div class="section-header-right">
-            <button class="btn btn-primary btn-sm" onclick="showToast('Menerbitkan batch sertifikat','info')">Terbitkan Batch</button>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); issueBatchCertificates()">Terbitkan Batch</button>
           </div>
         </div>
 
@@ -1633,8 +1796,8 @@
                 <td><span class="badge badge-success">Diterbitkan</span></td>
                 <td>
                   <div style="display:flex;gap:4px;">
-                    <a href="certificate.html" class="btn btn-ghost btn-sm">Lihat</a>
-                    <button class="btn btn-ghost btn-sm" onclick="showToast('Link verifikasi disalin','success')">Salin Link</button>
+                    <button class="btn btn-ghost btn-sm">Lihat</button>
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); copyVerificationLink(this.closest('tr'))">Salin Link</button>
                   </div>
                 </td>
               </tr>
@@ -1653,7 +1816,7 @@
                 <td>
                   <div style="display:flex;gap:4px;">
                     <button class="btn btn-ghost btn-sm">Lihat</button>
-                    <button class="btn btn-ghost btn-sm" onclick="showToast('Link verifikasi disalin','success')">Salin Link</button>
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); copyVerificationLink(this.closest('tr'))">Salin Link</button>
                   </div>
                 </td>
               </tr>
@@ -1672,7 +1835,7 @@
                 <td>
                   <div style="display:flex;gap:4px;">
                     <button class="btn btn-ghost btn-sm">Lihat</button>
-                    <button class="btn btn-ghost btn-sm" onclick="showToast('Link verifikasi disalin','success')">Salin Link</button>
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); copyVerificationLink(this.closest('tr'))">Salin Link</button>
                   </div>
                 </td>
               </tr>
@@ -1721,9 +1884,9 @@
             <div class="laporan-card-title">Laporan Data Peserta</div>
             <div class="laporan-card-desc">Daftar lengkap peserta, institusi, program, dan status keikutsertaan.</div>
             <div class="laporan-card-actions">
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan peserta CSV','info')">CSV</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan peserta XLSX','info')">XLSX</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan peserta PDF','info')">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('peserta','CSV')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('peserta','XLSX')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('peserta','PDF')">PDF</button>
             </div>
           </div>
 
@@ -1734,9 +1897,9 @@
             <div class="laporan-card-title">Laporan Progress</div>
             <div class="laporan-card-desc">Progress modul, quiz, dan aktivitas belajar per peserta secara rinci.</div>
             <div class="laporan-card-actions">
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan progress CSV','info')">CSV</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan progress XLSX','info')">XLSX</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan progress PDF','info')">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('progress','CSV')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('progress','XLSX')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('progress','PDF')">PDF</button>
             </div>
           </div>
 
@@ -1747,9 +1910,9 @@
             <div class="laporan-card-title">Laporan Nilai Ujian</div>
             <div class="laporan-card-desc">Rekap nilai pre/post/final exam, rata-rata, dan tingkat kelulusan.</div>
             <div class="laporan-card-actions">
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan nilai CSV','info')">CSV</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan nilai XLSX','info')">XLSX</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan nilai PDF','info')">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('nilai','CSV')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('nilai','XLSX')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('nilai','PDF')">PDF</button>
             </div>
           </div>
 
@@ -1760,9 +1923,9 @@
             <div class="laporan-card-title">Laporan Sertifikat</div>
             <div class="laporan-card-desc">Daftar sertifikat yang diterbitkan beserta nomor dan tanggal penerbitan.</div>
             <div class="laporan-card-actions">
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan sertifikat CSV','info')">CSV</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan sertifikat XLSX','info')">XLSX</button>
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan sertifikat PDF','info')">PDF</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('sertifikat','CSV')">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('sertifikat','XLSX')">XLSX</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('sertifikat','PDF')">PDF</button>
             </div>
           </div>
 
@@ -1773,8 +1936,8 @@
             <div class="laporan-card-title">Laporan Eksekutif</div>
             <div class="laporan-card-desc">Summary eksekutif untuk pimpinan GRCC — tersedia versi bulanan &amp; tahunan.</div>
             <div class="laporan-card-actions">
-              <button class="btn btn-outline btn-sm" onclick="showToast('Mengunduh laporan bulanan PDF','info')">Bulanan</button>
-              <button class="btn btn-primary btn-sm" onclick="showToast('Mengunduh laporan tahunan PDF','info')">Tahunan</button>
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportDemoReport('laporan bulanan','PDF')">Bulanan</button>
+              <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); exportDemoReport('laporan tahunan','PDF')">Tahunan</button>
             </div>
           </div>
 
@@ -1787,6 +1950,21 @@
 
 <div class="toast-container"></div>
 
+<div class="admin-modal" id="adminActionModal" aria-hidden="true">
+  <div class="admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="adminActionTitle">
+    <div class="admin-modal-head">
+      <div class="admin-modal-title" id="adminActionTitle">Aksi Admin</div>
+      <button class="admin-modal-close" onclick="closeAdminModal()" aria-label="Tutup">×</button>
+    </div>
+    <div class="admin-modal-body" id="adminActionBody"></div>
+    <div class="admin-modal-actions" id="adminActionActions">
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Tutup</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAdminModal()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/admin-data.js"></script>
 <script>
 const sectionTitles = {
   dashboard: 'Dashboard Admin',
@@ -1795,6 +1973,7 @@ const sectionTitles = {
   modul: 'Modul & Materi',
   soal: 'Bank Soal',
   progress: 'Progress Peserta',
+  instruktur: 'Manajemen Instruktur',
   nilai: 'Nilai & Kelulusan',
   sertifikat: 'Manajemen Sertifikat',
   laporan: 'Laporan Pembelajaran',
@@ -1845,18 +2024,1129 @@ function closeAdminSidebar() {
   document.getElementById('adminSidebarOverlay')?.classList.remove('show');
 }
 
-function approveUser(name) {
-  showToast(`✅ Peserta ${name} berhasil disetujui dan diaktifkan.`, 'success');
-  document.querySelectorAll('.badge-gold').forEach(b => {
-    if (b.closest('tr') && b.closest('tr').textContent.includes(name)) {
-      b.className = 'badge badge-success';
-      b.textContent = 'Aktif';
+function openAdminModal(title, body, options = {}) {
+  document.getElementById('adminActionTitle').textContent = title;
+  document.getElementById('adminActionBody').innerHTML = body;
+  const actions = document.getElementById('adminActionActions');
+  actions.innerHTML = options.actions || `
+    <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Tutup</button>
+    <button class="btn btn-primary btn-sm" onclick="saveAdminModal('${options.saveLabel || 'Perubahan'}')">Simpan</button>
+  `;
+  document.getElementById('adminActionModal').classList.add('show');
+  document.getElementById('adminActionModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeAdminModal() {
+  document.getElementById('adminActionModal').classList.remove('show');
+  document.getElementById('adminActionModal').setAttribute('aria-hidden', 'true');
+}
+
+function saveAdminModal(label = 'Perubahan') {
+  showToast(`${label} berhasil disimpan.`, 'success');
+  closeAdminModal();
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
+
+function getStatusClass(status) {
+  if (status === 'Aktif' || status === 'Lulus') return 'badge badge-success';
+  if (status === 'Remedial' || status === 'Ditolak') return 'badge badge-danger';
+  return 'badge badge-gold';
+}
+
+function getRowName(row) {
+  return row?.querySelector('.td-name, .td-primary')?.textContent.trim() || row?.cells?.[0]?.textContent.trim() || 'Data';
+}
+
+function getRowProgram(row) {
+  if (!row) return 'Program';
+  return [...row.cells].map((cell) => cell.textContent.trim()).find((text) => /ERM|Audit|Compliance|GRC|ESG|ISO|AML|Program/i.test(text)) || 'Program';
+}
+
+function setRowStatus(row, status) {
+  const badge = row?.querySelector('.badge');
+  if (!badge) return;
+  badge.className = getStatusClass(status);
+  badge.textContent = status;
+}
+
+function updateParticipantStats() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const participants = data.getParticipants();
+  const pending = participants.filter((participant) => participant.status === 'Menunggu').length;
+  const active = participants.filter((participant) => participant.status === 'Aktif').length;
+  const graduated = participants.filter((participant) => participant.status === 'Lulus').length;
+  const summary = document.getElementById('adminParticipantSummary');
+  const badge = document.getElementById('adminPendingBadge');
+  if (summary) {
+    summary.textContent = `${participants.length} peserta demo · ${pending} menunggu verifikasi · ${active} aktif · ${graduated} lulus`;
+  }
+  if (badge) {
+    badge.textContent = pending;
+    badge.style.display = pending ? 'flex' : 'none';
+  }
+}
+
+function renderParticipantRows() {
+  const data = window.GRCCAdminData;
+  const tbody = document.getElementById('participantTableBody');
+  if (!data || !tbody) return;
+  const participants = data.getParticipants();
+  tbody.innerHTML = participants.map((participant, index) => {
+    const status = participant.status || 'Menunggu';
+    const progress = Number(participant.progress || 0);
+    const progressColor = progress < 50 && progress > 0 ? 'background:var(--gold);' : '';
+    const action = status === 'Menunggu'
+      ? '<button class="btn btn-outline btn-sm">✓</button><button class="btn btn-ghost btn-sm">✕</button>'
+      : status === 'Lulus'
+        ? `<button class="btn btn-ghost btn-sm">Detail</button><button class="btn btn-outline btn-sm" ${participant.certificateIssued ? 'disabled' : ''}>${participant.certificateIssued ? 'Terbit' : 'Sertifikat'}</button>`
+        : `<button class="btn btn-ghost btn-sm">Detail</button><button class="btn btn-ghost btn-sm">Edit</button>`;
+    return `
+      <tr>
+        <td style="color:var(--text-xs);font-size:.8rem;">${index + 1}</td>
+        <td>
+          <div class="td-name-cell">
+            <div class="row-avatar" style="background:#CCFBF1;color:#0F766E;">${escapeHtml(initialsFromName(participant.name))}</div>
+            <div class="td-name-info">
+              <div class="td-name">${escapeHtml(participant.name)}</div>
+              <div class="td-email">${escapeHtml(participant.email || '-')}</div>
+            </div>
+          </div>
+        </td>
+        <td>${escapeHtml(participant.institution || '-')}</td>
+        <td>${escapeHtml(participant.program || '-')}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="prog-mini"><div class="prog-mini-fill" style="width:${progress}%;${progressColor}"></div></div>
+            <span style="font-size:.775rem;color:${progress ? 'inherit' : 'var(--text-xs)'};">${progress}%</span>
+          </div>
+        </td>
+        <td><span class="${getStatusClass(status)}">${escapeHtml(status)}</span></td>
+        <td style="font-size:.8rem;color:var(--text-xs);">${escapeHtml(participant.joined || '-')}</td>
+        <td><div style="display:flex;gap:4px;">${action}</div></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderProgramRows() {
+  const data = window.GRCCAdminData;
+  const tbody = document.getElementById('programTableBody');
+  if (!data || !tbody) return;
+  const programs = data.getProgramSummary();
+  tbody.innerHTML = programs.map((program) => `
+    <tr>
+      <td class="td-primary">${escapeHtml(program.name)}</td>
+      <td>${escapeHtml(program.category || '-')}</td>
+      <td>${escapeHtml(program.instructorName || 'Belum ditentukan')}</td>
+      <td>${Number(program.modules || 0)} modul</td>
+      <td>${program.participantCount}</td>
+      <td>${program.graduateCount ? `${program.graduateCount} (${program.graduateRate}%)` : '—'}</td>
+      <td><span class="${program.status === 'Aktif' ? 'badge badge-success' : 'badge badge-gold'}">${escapeHtml(program.status || 'Draft')}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn ${program.status === 'Draft' ? 'btn-outline' : 'btn-ghost'} btn-sm">Edit</button>
+          <button class="btn btn-ghost btn-sm">Modul</button>
+          <button class="btn btn-ghost btn-sm">Soal</button>
+          ${program.status === 'Draft' ? '<button class="btn btn-ghost btn-sm">Publish</button>' : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  updateProgramStats();
+}
+
+function updateProgramStats() {
+  const data = window.GRCCAdminData;
+  const summary = document.getElementById('adminProgramSummary');
+  if (!data || !summary) return;
+  const programs = data.getPrograms();
+  const active = programs.filter((program) => program.status === 'Aktif').length;
+  const draft = programs.filter((program) => program.status !== 'Aktif').length;
+  const participants = data.getParticipants().length;
+  summary.textContent = `${active} program aktif · ${draft} draft · ${participants} peserta tersambung`;
+}
+
+function renderModuleRows() {
+  const data = window.GRCCAdminData;
+  const tbody = document.getElementById('moduleTableBody');
+  if (!data || !tbody) return;
+  const modules = data.getModuleSummary();
+  tbody.innerHTML = modules.map((module) => `
+    <tr>
+      <td class="td-primary">${escapeHtml(module.title)}</td>
+      <td>${escapeHtml(module.program || '-')}</td>
+      <td>Modul ${Number(module.order || 0)}</td>
+      <td>${escapeHtml(module.files || '—')}</td>
+      <td>${Number(module.completedCount || 0)} peserta</td>
+      <td><span class="${module.status === 'Aktif' ? 'badge badge-success' : 'badge badge-gold'}">${escapeHtml(module.status || 'Draft')}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-ghost btn-sm">Edit</button>
+          <button class="btn ${module.files && module.files !== '—' ? 'btn-ghost' : 'btn-outline'} btn-sm">${module.files && module.files !== '—' ? 'File' : 'Unggah File'}</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  updateModuleStats();
+}
+
+function updateModuleStats() {
+  const data = window.GRCCAdminData;
+  const summary = document.getElementById('adminModuleSummary');
+  if (!data || !summary) return;
+  const modules = data.getModules();
+  const active = modules.filter((module) => module.status === 'Aktif').length;
+  const draft = modules.filter((module) => module.status !== 'Aktif').length;
+  summary.textContent = `${modules.length} modul · ${active} aktif · ${draft} draft · terhubung ke program`;
+}
+
+function questionTypeClass(type) {
+  if (type === 'Benar/Salah') return 'badge badge-gold';
+  if (type === 'Studi Kasus') return 'badge';
+  return 'badge badge-teal';
+}
+
+function difficultyColor(difficulty) {
+  if (difficulty === 'Sulit') return 'var(--danger)';
+  if (difficulty === 'Sedang') return 'var(--gold)';
+  return 'var(--success)';
+}
+
+function getQuestionModuleLabel(question) {
+  const module = window.GRCCAdminData?.getModules().find((item) => item.id === question.moduleId);
+  return module ? `Modul ${module.order} · ${module.title}` : (question.module || 'Modul 1');
+}
+
+function nextQuestionId() {
+  const data = window.GRCCAdminData;
+  const highest = (data?.getQuestions() || []).reduce((max, question) => {
+    const number = Number(String(question.id || '').replace(/[^0-9]/g, ''));
+    return Number.isFinite(number) ? Math.max(max, number) : max;
+  }, 0);
+  return 'Q-' + String(highest + 1).padStart(3, '0');
+}
+
+function renderQuestionRows() {
+  const data = window.GRCCAdminData;
+  const tbody = document.getElementById('questionTableBody');
+  if (!data || !tbody) return;
+  const questions = data.getQuestions();
+  tbody.innerHTML = questions.map((question) => `
+    <tr>
+      <td style="font-family:monospace;font-size:.8rem;color:var(--navy);">${escapeHtml(question.id)}</td>
+      <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(question.question)}</td>
+      <td><span class="${questionTypeClass(question.type)}" style="font-size:.7rem;${question.type === 'Studi Kasus' ? 'background:#EEF2FF;color:#6366F1;' : ''}">${escapeHtml(question.type)}</span></td>
+      <td>${escapeHtml(question.exam)}</td>
+      <td>${escapeHtml(getQuestionModuleLabel(question))}</td>
+      <td><span style="color:${difficultyColor(question.difficulty)};font-weight:600;font-size:.8rem;">${escapeHtml(question.difficulty)}</span></td>
+      <td><div style="display:flex;gap:4px;"><button class="btn btn-ghost btn-sm">Edit</button><button class="btn btn-ghost btn-sm">Hapus</button></div></td>
+    </tr>
+  `).join('');
+  updateQuestionStats();
+}
+
+function updateQuestionStats() {
+  const data = window.GRCCAdminData;
+  const wrap = document.getElementById('questionStats');
+  if (!data || !wrap) return;
+  const summary = data.getQuestionSummary();
+  wrap.innerHTML = `
+    <span class="badge badge-success" style="padding:6px 14px;font-size:.8rem;">Quiz: ${summary.quiz} soal</span>
+    <span class="badge badge-teal" style="padding:6px 14px;font-size:.8rem;">Pre-Test: ${summary.pre} soal</span>
+    <span class="badge badge-gold" style="padding:6px 14px;font-size:.8rem;">Post-Test: ${summary.post} soal</span>
+    <span class="badge" style="padding:6px 14px;font-size:.8rem;background:var(--navy);color:white;">Final Exam: ${summary.final} soal</span>
+  `;
+}
+
+function rejectUser(name) {
+  const data = window.GRCCAdminData;
+  if (data) {
+    const participants = data.getParticipants();
+    const query = data.normalizeName(name);
+    const next = participants.map((participant) => {
+      const normalized = data.normalizeName(participant.name);
+      return normalized.includes(query) || query.includes(normalized)
+        ? { ...participant, status: 'Ditolak', rejectedAt: new Date().toISOString() }
+        : participant;
+    });
+    data.saveParticipants(next);
+  }
+  renderParticipantRows();
+  syncParticipantRows();
+  renderAdminInstructorRows();
+  renderProgramRows();
+  renderModuleRows();
+  updateParticipantStats();
+  showToast(`Pendaftaran ${name} ditolak dan statusnya tersimpan.`, 'success');
+}
+
+function syncParticipantRows() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const participants = data.getParticipants();
+  document.querySelectorAll('.admin-table tbody tr').forEach((row) => {
+    const participant = participants.find((item) => row.textContent.includes(item.name.split(',')[0]));
+    if (!participant) return;
+    const badge = row.querySelector('.badge');
+    if (badge && ['Menunggu', 'Aktif', 'Lulus', 'Remedial', 'Ditolak'].includes(badge.textContent.trim())) {
+      badge.className = getStatusClass(participant.status);
+      badge.textContent = participant.status;
+    }
+    row.querySelectorAll('button').forEach((button) => {
+      const action = button.getAttribute('onclick') || '';
+      const label = button.textContent.trim();
+      if (action.includes('approveUser')) {
+        if (participant.status === 'Menunggu') {
+          button.textContent = label === 'Setujui' ? 'Setujui' : '✓';
+          button.disabled = false;
+        } else {
+          button.textContent = participant.status === 'Ditolak' ? 'Ditolak' : participant.status;
+          button.disabled = true;
+        }
+      }
+      if (label === '✕' || label === 'Tolak') {
+        button.disabled = participant.status !== 'Menunggu';
+        if (participant.status !== 'Menunggu') button.textContent = '—';
+      }
+    });
+    if (participant.certificateIssued) {
+      row.querySelectorAll('button').forEach((button) => {
+        const action = button.getAttribute('onclick') || '';
+        if (action.includes('issueCert')) {
+          button.textContent = 'Terbit';
+          button.disabled = true;
+        }
+      });
     }
   });
+  updateParticipantStats();
+  applyParticipantFilters();
+}
+
+function initialsFromName(name) {
+  return String(name || '')
+    .replace(/,\s*[^,]+$/g, '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase() || 'NA';
+}
+
+function renderAdminInstructorRows() {
+  const data = window.GRCCAdminData;
+  const tbody = document.getElementById('adminInstructorRows');
+  if (!data || !tbody) return;
+  tbody.innerHTML = data.getInstructorSummary().map((instructor) => `
+    <tr>
+      <td>
+        <div class="td-name-cell">
+          <div class="row-avatar" style="background:#E0E7FF;color:#4338CA;">${escapeHtml(initialsFromName(instructor.name))}</div>
+          <div class="td-name-info">
+            <div class="td-name">${escapeHtml(instructor.name)}</div>
+            <div class="td-email">${escapeHtml(instructor.role)}</div>
+          </div>
+        </div>
+      </td>
+      <td>${escapeHtml(instructor.programs.join(', '))}</td>
+      <td><span class="td-primary">${instructor.participantCount}</span></td>
+      <td><span class="badge ${instructor.pendingCount ? 'badge-gold' : 'badge-success'}">${instructor.pendingCount}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="prog-mini"><div class="prog-mini-fill" style="width:${instructor.averageProgress}%;"></div></div>
+          <span style="font-size:.775rem;">${instructor.averageProgress}%</span>
+        </div>
+      </td>
+      <td>${instructor.rating.toFixed(1)} / 5.0</td>
+      <td><button class="btn btn-outline btn-sm" onclick="showInstructorParticipants('${instructor.id}')">Lihat Peserta</button></td>
+    </tr>
+  `).join('');
+}
+
+function showInstructorParticipants(instructorId) {
+  const data = window.GRCCAdminData;
+  const tbody = document.getElementById('adminInstructorParticipants');
+  if (!data || !tbody) return;
+  const instructor = data.getInstructorSummary().find((item) => item.id === instructorId);
+  const participants = data.getParticipantsForInstructor(instructorId);
+  document.getElementById('adminInstructorDetailTitle').textContent = instructor ? `Peserta ${instructor.name}` : 'Peserta per Instruktur';
+  document.getElementById('adminInstructorDetailSub').textContent = `${participants.length} peserta terhubung ke dashboard instruktur.`;
+  tbody.innerHTML = participants.map((participant) => `
+    <tr>
+      <td>
+        <div class="td-name-cell">
+          <div class="row-avatar" style="background:#CCFBF1;color:#0F766E;">${escapeHtml(initialsFromName(participant.name))}</div>
+          <div class="td-name-info">
+            <div class="td-name">${escapeHtml(participant.name)}</div>
+            <div class="td-email">${escapeHtml(participant.email)}</div>
+          </div>
+        </div>
+      </td>
+      <td>${escapeHtml(participant.institution)}</td>
+      <td>${escapeHtml(participant.program)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="prog-mini"><div class="prog-mini-fill" style="width:${participant.progress}%;"></div></div>
+          <span style="font-size:.775rem;">${participant.progress}%</span>
+        </div>
+      </td>
+      <td><span class="${getStatusClass(participant.status)}">${escapeHtml(participant.status)}</span></td>
+      <td>${participant.certificateIssued ? `<span class="badge badge-success">${escapeHtml(participant.certificateNo || 'Terbit')}</span>` : '<span style="color:var(--text-xs);font-size:.8rem;">Belum</span>'}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="color:var(--text-xs);font-size:.85rem;">Belum ada peserta untuk instruktur ini.</td></tr>';
+  showSection('instruktur');
+}
+
+function approveUser(name) {
+  const updated = window.GRCCAdminData?.approveParticipant(name);
+  renderParticipantRows();
+  syncParticipantRows();
+  renderAdminInstructorRows();
+  renderProgramRows();
+  renderModuleRows();
+  updateParticipantStats();
+  showToast(`✅ Peserta ${(updated && updated.name) || name} berhasil disetujui dan terhubung ke instruktur.`, 'success');
 }
 
 function issueCert(name) {
-  showToast(`🏆 Sertifikat untuk ${name} berhasil diterbitkan!`, 'success');
+  const updated = window.GRCCAdminData?.issueCertificate(name);
+  renderParticipantRows();
+  syncParticipantRows();
+  renderAdminInstructorRows();
+  renderProgramRows();
+  renderModuleRows();
+  showToast(`🏆 Sertifikat untuk ${(updated && updated.name) || name} berhasil diterbitkan dan tersimpan.`, 'success');
+}
+
+function issueBatchCertificates() {
+  const data = window.GRCCAdminData;
+  const eligible = data ? data.getParticipants().filter((participant) => participant.status === 'Lulus' && !participant.certificateIssued) : [];
+  eligible.forEach((participant) => data.issueCertificate(participant.name));
+  renderParticipantRows();
+  syncParticipantRows();
+  renderAdminInstructorRows();
+  renderProgramRows();
+  renderModuleRows();
+  showToast(`${eligible.length || 0} sertifikat batch berhasil diterbitkan.`, 'success');
+}
+
+function openParticipantPanel(row, mode = 'Detail') {
+  const name = getRowName(row);
+  const participant = window.GRCCAdminData?.getParticipants().find((item) => row?.textContent.includes(item.name.split(',')[0]));
+  window.__editingParticipantName = participant?.name || name;
+  const readonly = mode === 'Detail' ? 'readonly' : '';
+  const disabled = mode === 'Detail' ? 'disabled' : '';
+  openAdminModal(`${mode} Peserta`, `
+    <div class="admin-modal-note">Data peserta ini tersambung ke status peserta dan ringkasan instruktur.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Nama</label><input id="participantNameInput" value="${escapeHtml(participant?.name || name)}" ${readonly}></div>
+      <div class="admin-field"><label>Email</label><input id="participantEmailInput" value="${escapeHtml(participant?.email || '-')}" ${readonly}></div>
+      <div class="admin-field"><label>Institusi</label><input id="participantInstitutionInput" value="${escapeHtml(participant?.institution || '-')}" ${readonly}></div>
+      <div class="admin-field"><label>Program</label><input id="participantProgramInput" value="${escapeHtml(participant?.program || getRowProgram(row))}" ${readonly}></div>
+      <div class="admin-field"><label>Status</label><select id="participantStatusInput" ${disabled}>
+        ${['Menunggu','Aktif','Lulus','Remedial','Ditolak'].map((status) => `<option ${status === (participant?.status || 'Aktif') ? 'selected' : ''}>${status}</option>`).join('')}
+      </select></div>
+    </div>
+  `, {
+    actions: mode === 'Detail'
+      ? '<button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Tutup</button>'
+      : `
+        <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+        <button class="btn btn-primary btn-sm" onclick="saveParticipantFromModal()">Simpan Peserta</button>
+      `,
+  });
+}
+
+function saveParticipantFromModal(originalName) {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const participants = data.getParticipants();
+  const query = data.normalizeName(originalName || window.__editingParticipantName);
+  const next = participants.map((participant) => {
+    const normalized = data.normalizeName(participant.name);
+    if (!normalized.includes(query) && !query.includes(normalized)) return participant;
+    return {
+      ...participant,
+      name: document.getElementById('participantNameInput')?.value.trim() || participant.name,
+      email: document.getElementById('participantEmailInput')?.value.trim() || participant.email,
+      institution: document.getElementById('participantInstitutionInput')?.value.trim() || participant.institution,
+      program: document.getElementById('participantProgramInput')?.value.trim() || participant.program,
+      status: document.getElementById('participantStatusInput')?.value || participant.status,
+      updatedAt: new Date().toISOString(),
+    };
+  });
+  data.saveParticipants(next);
+  renderParticipantRows();
+  syncParticipantRows();
+  renderAdminInstructorRows();
+  renderProgramRows();
+  closeAdminModal();
+  showToast('Data peserta berhasil disimpan dan disinkronkan.', 'success');
+}
+
+function openCreatePanel(type) {
+  const labels = {
+    peserta: ['Tambah Peserta', 'Nama peserta', 'Email', 'Institusi', 'Program'],
+    program: ['Tambah Program', 'Nama program', 'Kategori', 'Durasi', 'Instruktur'],
+    modul: ['Tambah Modul', 'Judul modul', 'Program', 'Urutan', 'File materi'],
+    soal: ['Tambah Soal', 'Pertanyaan', 'Tipe soal', 'Ujian', 'Tingkat kesulitan'],
+    instruktur: ['Tambah Instruktur', 'Nama instruktur', 'Email', 'Keahlian', 'Program diampu'],
+  };
+  const config = labels[type] || labels.peserta;
+  if (type === 'peserta') {
+    openAdminModal(config[0], `
+      <div class="admin-modal-note">Peserta baru akan masuk ke Data Peserta, status awal Menunggu, dan ikut muncul di rekap instruktur.</div>
+      <div class="admin-form-grid">
+        <div class="admin-field"><label>Nama peserta</label><input id="newParticipantName" placeholder="Nama peserta"></div>
+        <div class="admin-field"><label>Email</label><input id="newParticipantEmail" placeholder="email@domain.com"></div>
+        <div class="admin-field"><label>Institusi</label><input id="newParticipantInstitution" placeholder="Institusi"></div>
+        <div class="admin-field"><label>Program</label><input id="newParticipantProgram" placeholder="ERM Fundamental"></div>
+      </div>
+    `, {
+      actions: `
+        <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+        <button class="btn btn-primary btn-sm" onclick="saveNewParticipant()">Tambah Peserta</button>
+      `,
+    });
+    return;
+  }
+  if (type === 'program') {
+    const instructorOptions = (window.GRCCAdminData?.getInstructors() || [])
+      .map((instructor) => `<option value="${escapeHtml(instructor.id)}">${escapeHtml(instructor.name)} — ${escapeHtml(instructor.role)}</option>`)
+      .join('');
+    openAdminModal(config[0], `
+      <div class="admin-modal-note">Program baru akan tersimpan ke Manajemen Program dan bisa dipakai saat menambahkan peserta.</div>
+      <div class="admin-form-grid">
+        <div class="admin-field"><label>Nama program</label><input id="newProgramName" placeholder="Nama program"></div>
+        <div class="admin-field"><label>Kategori</label><input id="newProgramCategory" placeholder="Risk Management"></div>
+        <div class="admin-field"><label>Jumlah modul</label><input id="newProgramModules" type="number" min="0" value="0"></div>
+        <div class="admin-field"><label>Instruktur</label><select id="newProgramInstructor">${instructorOptions || '<option value="">Belum ada instruktur</option>'}</select></div>
+        <div class="admin-field"><label>Status</label><select id="newProgramStatus"><option>Draft</option><option>Aktif</option></select></div>
+      </div>
+    `, {
+      actions: `
+        <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+        <button class="btn btn-primary btn-sm" onclick="saveNewProgram()">Tambah Program</button>
+      `,
+    });
+    return;
+  }
+  if (type === 'modul') {
+    const programOptions = (window.GRCCAdminData?.getPrograms() || [])
+      .map((program) => `<option value="${escapeHtml(program.name)}">${escapeHtml(program.name)}</option>`)
+      .join('');
+    openAdminModal(config[0], `
+      <div class="admin-modal-note">Modul baru akan terhubung ke program yang dipilih dan muncul di tabel Modul & Materi.</div>
+      <div class="admin-form-grid">
+        <div class="admin-field"><label>Judul modul</label><input id="newModuleTitle" placeholder="Judul modul"></div>
+        <div class="admin-field"><label>Program</label><select id="newModuleProgram">${programOptions || '<option value="">Belum ada program</option>'}</select></div>
+        <div class="admin-field"><label>Urutan</label><input id="newModuleOrder" type="number" min="1" value="1"></div>
+        <div class="admin-field"><label>File materi</label><input id="newModuleFiles" placeholder="PDF, PPTX"></div>
+        <div class="admin-field"><label>Status</label><select id="newModuleStatus"><option>Draft</option><option>Aktif</option></select></div>
+      </div>
+    `, {
+      actions: `
+        <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+        <button class="btn btn-primary btn-sm" onclick="saveNewModule()">Tambah Modul</button>
+      `,
+    });
+    return;
+  }
+  if (type === 'soal') {
+    const moduleOptions = (window.GRCCAdminData?.getModules() || [])
+      .map((module) => `<option value="${escapeHtml(module.id)}">Modul ${Number(module.order || 0)} — ${escapeHtml(module.title)} — ${escapeHtml(module.program)}</option>`)
+      .join('');
+    openAdminModal(config[0], `
+      <div class="admin-modal-note">Soal baru akan terhubung ke modul dan tipe ujian yang dipilih.</div>
+      <div class="admin-form-grid">
+        <div class="admin-field"><label>Pertanyaan</label><textarea id="newQuestionText" placeholder="Tulis pertanyaan"></textarea></div>
+        <div class="admin-field"><label>Tipe soal</label><select id="newQuestionType"><option>Pilihan Ganda</option><option>Benar/Salah</option><option>Studi Kasus</option></select></div>
+        <div class="admin-field"><label>Ujian</label><select id="newQuestionExam"><option>Quiz</option><option>Pre-Test</option><option>Post-Test</option><option>Final Exam</option></select></div>
+        <div class="admin-field"><label>Modul</label><select id="newQuestionModule">${moduleOptions || '<option>Modul 1</option>'}</select></div>
+        <div class="admin-field"><label>Tingkat</label><select id="newQuestionDifficulty"><option>Mudah</option><option>Sedang</option><option>Sulit</option></select></div>
+      </div>
+    `, {
+      actions: `
+        <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+        <button class="btn btn-primary btn-sm" onclick="saveNewQuestion()">Tambah Soal</button>
+      `,
+    });
+    return;
+  }
+  openAdminModal(config[0], `
+    <div class="admin-modal-note">Form demo ini sudah aktif untuk menyimpan simulasi aksi admin pada halaman statis.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>${config[1]}</label><input placeholder="${config[1]}"></div>
+      <div class="admin-field"><label>${config[2]}</label><input placeholder="${config[2]}"></div>
+      <div class="admin-field"><label>${config[3]}</label><input placeholder="${config[3]}"></div>
+      <div class="admin-field"><label>${config[4]}</label><input placeholder="${config[4]}"></div>
+    </div>
+  `, { saveLabel: config[0] });
+}
+
+function saveNewProgram() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const programs = data.getPrograms();
+  const name = document.getElementById('newProgramName')?.value.trim() || 'Program Baru';
+  programs.unshift({
+    id: 'prog-' + Date.now(),
+    name,
+    category: document.getElementById('newProgramCategory')?.value.trim() || 'GRC',
+    modules: Number(document.getElementById('newProgramModules')?.value || 0),
+    status: document.getElementById('newProgramStatus')?.value || 'Draft',
+    instructorId: document.getElementById('newProgramInstructor')?.value || '',
+    createdAt: new Date().toISOString(),
+  });
+  data.savePrograms(programs);
+  data.assignProgramToInstructor(name, document.getElementById('newProgramInstructor')?.value || '');
+  renderProgramRows();
+  renderAdminInstructorRows();
+  closeAdminModal();
+  showToast('Program baru berhasil ditambahkan dan terhubung ke instruktur.', 'success');
+}
+
+function openProgramPanel(row) {
+  const data = window.GRCCAdminData;
+  if (!data || !row) return;
+  const name = getRowName(row);
+  const query = data.normalizeName(name);
+  const program = data.getPrograms().find((item) => {
+    const normalized = data.normalizeName(item.name);
+    return normalized.includes(query) || query.includes(normalized);
+  });
+  window.__editingProgramName = program?.name || name;
+  const assignedInstructorId = program?.instructorId || (data.getInstructors().find((instructor) => (instructor.programs || []).some((item) => data.normalizeName(item) === data.normalizeName(program?.name || name))) || {}).id || '';
+  const instructorOptions = data.getInstructors()
+    .map((instructor) => `<option value="${escapeHtml(instructor.id)}" ${instructor.id === assignedInstructorId ? 'selected' : ''}>${escapeHtml(instructor.name)} — ${escapeHtml(instructor.role)}</option>`)
+    .join('');
+  openAdminModal('Edit Program', `
+    <div class="admin-modal-note">Perubahan program akan memperbarui Manajemen Program. Jumlah peserta dan lulus tetap dihitung otomatis dari Data Peserta.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Nama program</label><input id="programNameInput" value="${escapeHtml(program?.name || name)}"></div>
+      <div class="admin-field"><label>Kategori</label><input id="programCategoryInput" value="${escapeHtml(program?.category || '-')}"></div>
+      <div class="admin-field"><label>Jumlah modul</label><input id="programModulesInput" type="number" min="0" value="${Number(program?.modules || 0)}"></div>
+      <div class="admin-field"><label>Instruktur</label><select id="programInstructorInput">${instructorOptions || '<option value="">Belum ada instruktur</option>'}</select></div>
+      <div class="admin-field"><label>Status</label><select id="programStatusInput">
+        ${['Aktif','Draft','Arsip'].map((status) => `<option ${status === (program?.status || 'Draft') ? 'selected' : ''}>${status}</option>`).join('')}
+      </select></div>
+    </div>
+  `, {
+    actions: `
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+      <button class="btn btn-primary btn-sm" onclick="saveProgramFromModal()">Simpan Program</button>
+    `,
+  });
+}
+
+function saveProgramFromModal() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const query = data.normalizeName(window.__editingProgramName);
+  const programs = data.getPrograms().map((program) => {
+    const normalized = data.normalizeName(program.name);
+    if (!normalized.includes(query) && !query.includes(normalized)) return program;
+    return {
+      ...program,
+      name: document.getElementById('programNameInput')?.value.trim() || program.name,
+      category: document.getElementById('programCategoryInput')?.value.trim() || program.category,
+      modules: Number(document.getElementById('programModulesInput')?.value || program.modules || 0),
+      status: document.getElementById('programStatusInput')?.value || program.status,
+      instructorId: document.getElementById('programInstructorInput')?.value || program.instructorId || '',
+      updatedAt: new Date().toISOString(),
+    };
+  });
+  data.savePrograms(programs);
+  data.assignProgramToInstructor(document.getElementById('programNameInput')?.value.trim() || window.__editingProgramName, document.getElementById('programInstructorInput')?.value || '', window.__editingProgramName);
+  renderProgramRows();
+  renderAdminInstructorRows();
+  closeAdminModal();
+  showToast('Program berhasil disimpan.', 'success');
+}
+
+function publishProgramFromRow(row) {
+  const data = window.GRCCAdminData;
+  if (!data || !row) return;
+  const program = data.publishProgram(getRowName(row));
+  renderProgramRows();
+  showToast(`${program?.name || 'Program'} berhasil dipublish.`, 'success');
+}
+
+function saveNewModule() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const modules = data.getModules();
+  modules.unshift({
+    id: 'mod-' + Date.now(),
+    title: document.getElementById('newModuleTitle')?.value.trim() || 'Modul Baru',
+    program: document.getElementById('newModuleProgram')?.value || 'ERM Fundamental',
+    order: Number(document.getElementById('newModuleOrder')?.value || 1),
+    files: document.getElementById('newModuleFiles')?.value.trim() || '—',
+    status: document.getElementById('newModuleStatus')?.value || 'Draft',
+    createdAt: new Date().toISOString(),
+  });
+  data.saveModules(modules);
+  renderModuleRows();
+  renderProgramRows();
+  closeAdminModal();
+  showToast('Modul baru berhasil ditambahkan dan terhubung ke program.', 'success');
+}
+
+function openModulePanel(row) {
+  const data = window.GRCCAdminData;
+  if (!data || !row) return;
+  const title = getRowName(row);
+  const query = data.normalizeName(title);
+  const module = data.getModules().find((item) => data.normalizeName(item.title).includes(query) || query.includes(data.normalizeName(item.title)));
+  window.__editingModuleTitle = module?.title || title;
+  const programOptions = data.getPrograms()
+    .map((program) => `<option value="${escapeHtml(program.name)}" ${program.name === module?.program ? 'selected' : ''}>${escapeHtml(program.name)}</option>`)
+    .join('');
+  openAdminModal('Edit Modul', `
+    <div class="admin-modal-note">Modul ini terhubung ke program. Perubahan program akan memindahkan modul ke program baru.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Judul modul</label><input id="moduleTitleInput" value="${escapeHtml(module?.title || title)}"></div>
+      <div class="admin-field"><label>Program</label><select id="moduleProgramInput">${programOptions || '<option value="">Belum ada program</option>'}</select></div>
+      <div class="admin-field"><label>Urutan</label><input id="moduleOrderInput" type="number" min="1" value="${Number(module?.order || 1)}"></div>
+      <div class="admin-field"><label>File lampiran</label><input id="moduleFilesInput" value="${escapeHtml(module?.files || '—')}"></div>
+      <div class="admin-field"><label>Status</label><select id="moduleStatusInput">
+        ${['Aktif','Draft','Arsip'].map((status) => `<option ${status === (module?.status || 'Draft') ? 'selected' : ''}>${status}</option>`).join('')}
+      </select></div>
+    </div>
+  `, {
+    actions: `
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+      <button class="btn btn-primary btn-sm" onclick="saveModuleFromModal()">Simpan Modul</button>
+    `,
+  });
+}
+
+function saveModuleFromModal() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const query = data.normalizeName(window.__editingModuleTitle);
+  const modules = data.getModules().map((module) => {
+    const normalized = data.normalizeName(module.title);
+    if (!normalized.includes(query) && !query.includes(normalized)) return module;
+    return {
+      ...module,
+      title: document.getElementById('moduleTitleInput')?.value.trim() || module.title,
+      program: document.getElementById('moduleProgramInput')?.value || module.program,
+      order: Number(document.getElementById('moduleOrderInput')?.value || module.order || 1),
+      files: document.getElementById('moduleFilesInput')?.value.trim() || module.files || '—',
+      status: document.getElementById('moduleStatusInput')?.value || module.status,
+      updatedAt: new Date().toISOString(),
+    };
+  });
+  data.saveModules(modules);
+  renderModuleRows();
+  renderProgramRows();
+  closeAdminModal();
+  showToast('Modul berhasil disimpan.', 'success');
+}
+
+function openModuleFilePanel(row) {
+  const data = window.GRCCAdminData;
+  if (!data || !row) return openFilePanel(row);
+  const title = getRowName(row);
+  const query = data.normalizeName(title);
+  const module = data.getModules().find((item) => data.normalizeName(item.title).includes(query) || query.includes(data.normalizeName(item.title)));
+  window.__editingModuleTitle = module?.title || title;
+  openAdminModal('Kelola File Modul', `
+    <div class="admin-modal-note">Isi daftar file lampiran. Contoh: PDF, PPTX, XLSX.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Modul</label><input value="${escapeHtml(module?.title || title)}" readonly></div>
+      <div class="admin-field"><label>File lampiran</label><input id="moduleFileInput" value="${escapeHtml(module?.files || '—')}"></div>
+    </div>
+  `, {
+    actions: `
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+      <button class="btn btn-primary btn-sm" onclick="saveModuleFiles()">Simpan File</button>
+    `,
+  });
+}
+
+function openModuleFilePicker() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const moduleOptions = data.getModules()
+    .map((module) => `<option value="${escapeHtml(module.id)}">${escapeHtml(module.title)} — ${escapeHtml(module.program)}</option>`)
+    .join('');
+  openAdminModal('Unggah Materi Modul', `
+    <div class="admin-modal-note">Pilih modul yang akan diberi lampiran materi. Data file akan tersimpan di Modul & Materi.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Modul</label><select id="modulePickerInput">${moduleOptions || '<option value="">Belum ada modul</option>'}</select></div>
+      <div class="admin-field"><label>File lampiran</label><input id="modulePickerFileInput" placeholder="PDF, PPTX, XLSX"></div>
+    </div>
+  `, {
+    actions: `
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+      <button class="btn btn-primary btn-sm" onclick="saveModulePickerFiles()">Simpan File</button>
+    `,
+  });
+}
+
+function saveModulePickerFiles() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const moduleId = document.getElementById('modulePickerInput')?.value;
+  const files = document.getElementById('modulePickerFileInput')?.value.trim() || 'PDF';
+  const modules = data.getModules().map((module) => (
+    module.id === moduleId
+      ? { ...module, files, status: 'Aktif', updatedAt: new Date().toISOString() }
+      : module
+  ));
+  data.saveModules(modules);
+  renderModuleRows();
+  renderProgramRows();
+  closeAdminModal();
+  showToast('Materi modul berhasil diunggah.', 'success');
+}
+
+function saveModuleFiles() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const query = data.normalizeName(window.__editingModuleTitle);
+  const modules = data.getModules().map((module) => {
+    const normalized = data.normalizeName(module.title);
+    if (!normalized.includes(query) && !query.includes(normalized)) return module;
+    return { ...module, files: document.getElementById('moduleFileInput')?.value.trim() || '—', status: 'Aktif', updatedAt: new Date().toISOString() };
+  });
+  data.saveModules(modules);
+  renderModuleRows();
+  renderProgramRows();
+  closeAdminModal();
+  showToast('File modul berhasil diperbarui.', 'success');
+}
+
+function saveNewQuestion() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const questions = data.getQuestions();
+  const moduleId = document.getElementById('newQuestionModule')?.value || '';
+  const module = data.getModules().find((item) => item.id === moduleId);
+  questions.unshift({
+    id: nextQuestionId(),
+    question: document.getElementById('newQuestionText')?.value.trim() || 'Pertanyaan baru',
+    type: document.getElementById('newQuestionType')?.value || 'Pilihan Ganda',
+    exam: document.getElementById('newQuestionExam')?.value || 'Quiz',
+    module: module ? `Modul ${module.order}` : 'Modul 1',
+    moduleId,
+    difficulty: document.getElementById('newQuestionDifficulty')?.value || 'Mudah',
+    createdAt: new Date().toISOString(),
+  });
+  data.saveQuestions(questions);
+  renderQuestionRows();
+  closeAdminModal();
+  showToast('Soal baru berhasil ditambahkan.', 'success');
+}
+
+function openQuestionPanel(row) {
+  const data = window.GRCCAdminData;
+  if (!data || !row) return;
+  const id = row.cells?.[0]?.textContent.trim();
+  const question = data.getQuestions().find((item) => item.id === id);
+  window.__editingQuestionId = question?.id || id;
+  const moduleOptions = data.getModules()
+    .map((module) => {
+      const selected = module.id === question?.moduleId || ('Modul ' + module.order) === question?.module;
+      return `<option value="${escapeHtml(module.id)}" ${selected ? 'selected' : ''}>Modul ${Number(module.order || 0)} — ${escapeHtml(module.title)} — ${escapeHtml(module.program)}</option>`;
+    })
+    .join('');
+  openAdminModal('Edit Soal', `
+    <div class="admin-modal-note">Soal terhubung ke modul dan tipe ujian. Perubahan akan tersimpan di Bank Soal.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Kode</label><input value="${escapeHtml(question?.id || id)}" readonly></div>
+      <div class="admin-field"><label>Pertanyaan</label><textarea id="questionTextInput">${escapeHtml(question?.question || '')}</textarea></div>
+      <div class="admin-field"><label>Tipe soal</label><select id="questionTypeInput">${['Pilihan Ganda','Benar/Salah','Studi Kasus'].map((type) => `<option ${type === question?.type ? 'selected' : ''}>${type}</option>`).join('')}</select></div>
+      <div class="admin-field"><label>Ujian</label><select id="questionExamInput">${['Quiz','Quiz M6','Pre-Test','Post-Test','Final Exam'].map((exam) => `<option ${exam === question?.exam ? 'selected' : ''}>${exam}</option>`).join('')}</select></div>
+      <div class="admin-field"><label>Modul</label><select id="questionModuleInput">${moduleOptions || '<option>Modul 1</option>'}</select></div>
+      <div class="admin-field"><label>Tingkat</label><select id="questionDifficultyInput">${['Mudah','Sedang','Sulit'].map((difficulty) => `<option ${difficulty === question?.difficulty ? 'selected' : ''}>${difficulty}</option>`).join('')}</select></div>
+    </div>
+  `, {
+    actions: `
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+      <button class="btn btn-primary btn-sm" onclick="saveQuestionFromModal()">Simpan Soal</button>
+    `,
+  });
+}
+
+function saveQuestionFromModal() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const moduleId = document.getElementById('questionModuleInput')?.value || '';
+  const module = data.getModules().find((item) => item.id === moduleId);
+  const questions = data.getQuestions().map((question) => (
+    question.id === window.__editingQuestionId
+      ? {
+        ...question,
+        question: document.getElementById('questionTextInput')?.value.trim() || question.question,
+        type: document.getElementById('questionTypeInput')?.value || question.type,
+        exam: document.getElementById('questionExamInput')?.value || question.exam,
+        module: module ? `Modul ${module.order}` : question.module,
+        moduleId: moduleId || question.moduleId || '',
+        difficulty: document.getElementById('questionDifficultyInput')?.value || question.difficulty,
+        updatedAt: new Date().toISOString(),
+      }
+      : question
+  ));
+  data.saveQuestions(questions);
+  renderQuestionRows();
+  closeAdminModal();
+  showToast('Soal berhasil disimpan.', 'success');
+}
+
+function deleteQuestionFromRow(row) {
+  const data = window.GRCCAdminData;
+  if (!data || !row) return;
+  const id = row.cells?.[0]?.textContent.trim();
+  window.__pendingDeleteQuestionId = id;
+  openAdminModal('Hapus Soal', `
+    <div class="admin-modal-note">Soal ${escapeHtml(id || '')} akan dihapus dari Bank Soal.</div>
+    <p style="color:var(--text-sm);font-size:.9rem;line-height:1.6;margin:0;">Tindakan ini menghapus soal dari data lokal admin.</p>
+  `, {
+    actions: `
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Batal</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteQuestion()">Hapus Soal</button>
+    `,
+  });
+}
+
+function confirmDeleteQuestion() {
+  const data = window.GRCCAdminData;
+  const id = window.__pendingDeleteQuestionId;
+  if (!data || !id) return closeAdminModal();
+  data.saveQuestions(data.getQuestions().filter((question) => question.id !== id));
+  window.__pendingDeleteQuestionId = '';
+  renderQuestionRows();
+  closeAdminModal();
+  showToast(`${id || 'Soal'} berhasil dihapus.`, 'success');
+}
+
+function saveNewParticipant() {
+  const data = window.GRCCAdminData;
+  if (!data) return;
+  const participants = data.getParticipants();
+  const name = document.getElementById('newParticipantName')?.value.trim() || 'Peserta Baru';
+  const program = document.getElementById('newParticipantProgram')?.value.trim() || 'ERM Fundamental';
+  participants.unshift({
+    id: 'p-' + Date.now(),
+    name,
+    email: document.getElementById('newParticipantEmail')?.value.trim() || '-',
+    institution: document.getElementById('newParticipantInstitution')?.value.trim() || '-',
+    program,
+    instructorId: program.toLowerCase().includes('audit') ? 'i-ratna' : program.toLowerCase().includes('compliance') ? 'i-maya' : 'i-hendri',
+    progress: 0,
+    status: 'Menunggu',
+    joined: new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }),
+    certificateIssued: false,
+  });
+  data.saveParticipants(participants);
+  renderParticipantRows();
+  syncParticipantRows();
+  renderAdminInstructorRows();
+  closeAdminModal();
+  showToast('Peserta baru berhasil ditambahkan dan menunggu verifikasi.', 'success');
+}
+
+function openEditPanel(row, label) {
+  const title = getRowName(row);
+  openAdminModal(`Edit ${label}`, `
+    <div class="admin-modal-note">Perubahan akan disimpan sebagai simulasi pada UI admin.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Nama</label><input value="${escapeHtml(title)}"></div>
+      <div class="admin-field"><label>Keterangan</label><textarea>${escapeHtml(row?.textContent.trim().replace(/\s+/g, ' ') || '')}</textarea></div>
+      <div class="admin-field"><label>Status</label><select><option>Aktif</option><option>Draft</option><option>Menunggu</option><option>Arsip</option></select></div>
+    </div>
+  `, { saveLabel: label });
+}
+
+function openFilePanel(row) {
+  openAdminModal('Kelola File Materi', `
+    <div class="admin-modal-note">Panel file siap dipakai untuk upload, pratinjau, dan penggantian lampiran materi.</div>
+    <div class="admin-form-grid">
+      <div class="admin-field"><label>Materi</label><input value="${escapeHtml(getRowName(row))}"></div>
+      <div class="admin-field"><label>File</label><input type="file"></div>
+      <div class="admin-field"><label>Catatan versi</label><textarea placeholder="Ringkasan perubahan file"></textarea></div>
+    </div>
+  `, { saveLabel: 'File materi' });
+}
+
+function exportDemoReport(label, format = 'CSV') {
+  const ext = format.toLowerCase() === 'bulanan' || format.toLowerCase() === 'tahunan' ? 'pdf' : format.toLowerCase();
+  const payload = [
+    ['Laporan', 'Format', 'Tanggal'],
+    [label, format, new Date().toLocaleDateString('id-ID')],
+  ].map((row) => row.join(',')).join('\n');
+  const blob = new Blob([payload], { type: ext === 'pdf' ? 'application/pdf' : 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `grcc-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.${ext}`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Laporan ${label} (${format}) berhasil dibuat.`, 'success');
+}
+
+function copyVerificationLink(row) {
+  const name = getRowName(row).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const link = new URL(`certificate.html?id=${name}`, location.href).href;
+  const fallback = () => {
+    openAdminModal('Link Verifikasi Sertifikat', `
+      <div class="admin-modal-note">Browser memblokir akses clipboard otomatis. Link sudah disiapkan di bawah ini.</div>
+      <div class="admin-field">
+        <label>Link Verifikasi</label>
+        <input id="certVerificationLink" value="${escapeHtml(link)}" readonly onclick="this.select()">
+      </div>
+    `, {
+      actions: `
+        <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Tutup</button>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('certVerificationLink')?.select(); showToast('Link siap disalin manual.','info')">Pilih Link</button>
+      `,
+    });
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(link)
+      .then(() => showToast('Link verifikasi sertifikat disalin.', 'success'))
+      .catch(fallback);
+    return;
+  }
+
+  fallback();
+}
+
+function openCertificatePreview(row) {
+  window.__certificatePreviewRow = row;
+  const cells = row ? [...row.cells].map((cell) => cell.textContent.trim().replace(/\s+/g, ' ')) : [];
+  const certNo = cells[0] && cells[0] !== '—' ? cells[0] : 'GRCC/2026/DEMO/PREVIEW';
+  const name = getRowName(row);
+  const program = cells[2] || 'Program GRCC Academy';
+  const score = (cells[3] || '100').replace(/[^0-9]/g, '') || '100';
+  const issued = cells[4] && cells[4] !== '—' ? cells[4] : new Date().toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+  openAdminModal('Preview Sertifikat', `
+    <div style="border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:white;">
+      <div style="background:linear-gradient(135deg,#071830,#0B2447);padding:22px 26px;color:white;display:flex;justify-content:space-between;gap:16px;align-items:center;">
+        <div>
+          <div style="font-family:var(--font-h);font-weight:800;font-size:1.05rem;">GRCC Academy</div>
+          <div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;">Sertifikat Kompetensi</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:.65rem;color:rgba(255,255,255,.55);">Nomor Sertifikat</div>
+          <div style="font-family:monospace;font-weight:800;color:#5EEAD4;margin-top:4px;">${escapeHtml(certNo)}</div>
+        </div>
+      </div>
+      <div style="height:3px;background:linear-gradient(90deg,var(--teal),var(--gold),var(--teal));"></div>
+      <div style="padding:30px 28px;text-align:center;">
+        <div style="font-size:.85rem;color:var(--text-sm);font-style:italic;margin-bottom:10px;">dengan bangga menyatakan bahwa</div>
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:2rem;font-weight:700;color:var(--navy);line-height:1.2;margin-bottom:14px;">${escapeHtml(name)}</div>
+        <div style="font-size:.85rem;color:var(--text-md);margin-bottom:8px;">telah berhasil menyelesaikan dan lulus program</div>
+        <div style="font-family:var(--font-h);font-size:1.05rem;font-weight:800;color:var(--navy);line-height:1.35;margin-bottom:22px;">${escapeHtml(program)}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;text-align:center;">
+          <div style="padding:12px;background:var(--bg);border-right:1px solid var(--border);">
+            <div style="font-size:.62rem;color:var(--text-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Tanggal</div>
+            <div style="font-weight:800;color:var(--navy);margin-top:5px;">${escapeHtml(issued)}</div>
+          </div>
+          <div style="padding:12px;background:var(--bg);border-right:1px solid var(--border);">
+            <div style="font-size:.62rem;color:var(--text-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Nilai</div>
+            <div style="font-weight:800;color:var(--teal);margin-top:5px;">${escapeHtml(score)} / 100</div>
+          </div>
+          <div style="padding:12px;background:var(--bg);">
+            <div style="font-size:.62rem;color:var(--text-xs);font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Status</div>
+            <div style="font-weight:800;color:var(--success);margin-top:5px;">LULUS</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:16px 24px;background:var(--bg);border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:14px;align-items:flex-end;">
+        <div>
+          <div style="height:32px;font-family:'Brush Script MT',Georgia,cursive;font-size:1.4rem;color:var(--navy);">Dr. Hendri Kurniawan</div>
+          <div style="border-top:1px solid var(--navy);padding-top:6px;font-size:.78rem;font-weight:800;color:var(--navy);">Direktur Eksekutif</div>
+          <div style="font-size:.72rem;color:var(--text-xs);margin-top:2px;">GRCC Academy</div>
+        </div>
+        <div style="text-align:right;font-size:.72rem;color:var(--text-xs);line-height:1.5;">Preview admin<br>Terverifikasi</div>
+      </div>
+    </div>
+    <div class="admin-modal-note" style="margin-top:14px;margin-bottom:0;">Preview ini ditampilkan langsung dari data baris sertifikat admin. Admin tetap berada di halaman Manajemen Sertifikat.</div>
+  `, {
+    actions: `
+      <button class="btn btn-ghost btn-sm" onclick="closeAdminModal()">Tutup</button>
+      <button class="btn btn-outline btn-sm" onclick="copyVerificationLink(window.__certificatePreviewRow)">Salin Link</button>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">Cetak</button>
+    `,
+  });
+}
+
+function applyParticipantFilters() {
+  const section = document.getElementById('section-peserta');
+  if (!section) return;
+  const query = section.querySelector('.toolbar-search input')?.value.toLowerCase().trim() || '';
+  const status = section.querySelector('.toolbar select')?.value || 'Semua Status';
+  section.querySelectorAll('.admin-table tbody tr').forEach((row) => {
+    const text = row.textContent.toLowerCase();
+    const rowStatus = row.querySelector('.badge')?.textContent.trim() || '';
+    const matchQuery = !query || text.includes(query);
+    const matchStatus = status === 'Semua Status' || rowStatus === status;
+    row.style.display = matchQuery && matchStatus ? '' : 'none';
+  });
+}
+
+function handleAdminButton(button) {
+  const row = button.closest('tr');
+  const section = button.closest('.admin-section')?.id || '';
+  const label = button.textContent.trim();
+  if (!label) return;
+
+  if (label === '✓' || label === 'Setujui') return approveUser(getRowName(row));
+  if (label === 'Tolak' || label === '✕') return rejectUser(getRowName(row));
+  if (label === 'Sertifikat') return issueCert(getRowName(row));
+  if (label === 'Detail') return openParticipantPanel(row, 'Detail');
+  if (label === 'Lihat' && section === 'section-sertifikat') return openCertificatePreview(row);
+  if (label === 'Lihat') return openParticipantPanel(row, 'Detail');
+  if (label === 'Edit' && section === 'section-peserta') return openParticipantPanel(row, 'Edit');
+  if (label === 'Edit' && section === 'section-program') return openProgramPanel(row);
+  if (label === 'Edit' && section === 'section-modul') return openModulePanel(row);
+  if (label === 'Edit' && section === 'section-soal') return openQuestionPanel(row);
+  if (label === 'Edit') return openEditPanel(row, section.replace('section-', '') || 'Data');
+  if (label === 'Modul') return showSection('modul');
+  if (label === 'Soal') return showSection('soal');
+  if ((label === 'File' || label.includes('Unggah')) && section === 'section-modul') return openModuleFilePanel(row);
+  if (label === 'File' || label.includes('Unggah')) return openFilePanel(row);
+  if (label === 'Publish') {
+    if (section === 'section-program') return publishProgramFromRow(row);
+    setRowStatus(row, 'Aktif');
+    return showToast(`${getRowName(row)} berhasil dipublish.`, 'success');
+  }
+  if (label === 'Hapus') {
+    if (section === 'section-soal') return deleteQuestionFromRow(row);
+    row?.remove();
+    return showToast('Data berhasil dihapus dari tampilan admin.', 'success');
+  }
+  if (label.includes('Ujian Ulang')) return showToast(`Izin ujian ulang diberikan untuk ${getRowName(row)}.`, 'success');
+  if (label === 'Tambah Peserta') return openCreatePanel('peserta');
+  if (label === 'Tambah Program') return openCreatePanel('program');
+  if (label === 'Tambah Modul') return openCreatePanel('modul');
+  if (label === 'Tambah Soal') return openCreatePanel('soal');
+  if (label === 'Tambah Instruktur') return openCreatePanel('instruktur');
+  if (label.includes('Batch')) return issueBatchCertificates();
+  if (label === 'Salin Link') return copyVerificationLink(row);
+  if (['CSV', 'XLSX', 'PDF', 'Bulanan', 'Tahunan'].includes(label)) return exportDemoReport(section.replace('section-', '') || 'admin', label);
+  if (label === 'Ekspor') return exportDemoReport(document.getElementById('admin-page-title').textContent, 'CSV');
+  if (label === 'Sinkronkan') {
+    syncParticipantRows();
+    renderAdminInstructorRows();
+    return showToast('Data peserta dan instruktur sudah disinkronkan.', 'success');
+  }
 }
 
 function showToast(msg, type) {
@@ -1890,6 +3180,25 @@ window.addEventListener('resize', () => {
   if (nameEl) nameEl.textContent = shortName;
   const roleEl = document.querySelector('.admin-user-role');
   if (roleEl) roleEl.textContent = 'Super Admin';
+  renderParticipantRows();
+  renderProgramRows();
+  renderModuleRows();
+  renderQuestionRows();
+  syncParticipantRows();
+  renderAdminInstructorRows();
+  document.querySelector('#section-peserta .toolbar-search input')?.addEventListener('input', applyParticipantFilters);
+  document.querySelector('#section-peserta .toolbar select')?.addEventListener('change', applyParticipantFilters);
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('button');
+    if (!button || button.closest('#adminActionModal') || button.id === 'adminToggle') return;
+    handleAdminButton(button);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAdminModal();
+  });
+  document.getElementById('adminActionModal')?.addEventListener('click', (event) => {
+    if (event.target.id === 'adminActionModal') closeAdminModal();
+  });
   showSection((location.hash || '#dashboard').replace('#', ''));
   // Logout handler
   document.querySelectorAll('a[href="login.html"]').forEach(a => {

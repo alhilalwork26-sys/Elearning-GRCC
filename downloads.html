@@ -347,6 +347,60 @@
       font-weight: 700;
     }
 
+    .admin-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(7,24,48,.48);
+    }
+    .admin-modal.show { display: flex; }
+    .admin-modal-card {
+      width: min(640px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+      background: var(--white);
+      box-shadow: var(--sh-lg);
+    }
+    .admin-modal-head,
+    .admin-modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-modal-actions {
+      justify-content: flex-end;
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+    }
+    .admin-modal-title { font-family: var(--font-h); font-weight: 800; color: var(--navy); }
+    .admin-modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--text-sm);
+      font-size: 1rem;
+    }
+    .admin-modal-body { padding: 20px; }
+    .admin-modal-note {
+      padding: 12px 14px;
+      border-radius: var(--r-md);
+      background: var(--bg);
+      color: var(--text-sm);
+      font-size: .9rem;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
     /* ── Sidebar Keluar ── */
     .sidebar-bottom-sep {
       margin: 8px 12px 0;
@@ -1049,18 +1103,70 @@ function showToast(msg, type) {
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
 }
 
+function makeDownload(filename, contents, mime = 'text/plain;charset=utf-8') {
+  const blob = new Blob([contents], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function downloadFile(filename, size) {
-  showToast(`Mengunduh ${filename} (${size})...`, 'info');
-  setTimeout(() => showToast(`✅ ${filename} berhasil diunduh!`, 'success'), 1800);
+  const ext = filename.split('.').pop().toLowerCase();
+  const mime = ext === 'xlsx'
+    ? 'text/csv;charset=utf-8'
+    : ext === 'pdf'
+      ? 'application/pdf'
+      : 'text/plain;charset=utf-8';
+  const body = [
+    'GRCC Academy',
+    `File: ${filename}`,
+    `Ukuran demo: ${size}`,
+    `Diunduh: ${new Date().toLocaleString('id-ID')}`,
+    '',
+    'Ini adalah file demo untuk preview website statis. Pada sistem produksi, URL ini akan diarahkan ke storage materi asli.',
+  ].join('\n');
+  makeDownload(filename, body, mime);
+  showToast(`✅ ${filename} berhasil diunduh.`, 'success');
 }
 
 function previewFile(name) {
-  showToast(`Membuka preview: ${name}`, 'info');
+  const safeName = String(name || 'Materi').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  const modal = document.createElement('div');
+  modal.className = 'admin-modal show';
+  modal.style.zIndex = '99';
+  modal.innerHTML = `
+    <div class="admin-modal-card" style="max-width:640px;">
+      <div class="admin-modal-head">
+        <div class="admin-modal-title">Preview Materi</div>
+        <button class="admin-modal-close" onclick="this.closest('.admin-modal').remove()">×</button>
+      </div>
+      <div class="admin-modal-body">
+        <div class="admin-modal-note">Preview lokal untuk ${safeName}. File asli akan tersedia dari storage pada versi produksi.</div>
+        <div style="border:1px solid var(--border);border-radius:var(--r-md);padding:22px;background:var(--bg);">
+          <div style="font-weight:800;color:var(--navy);margin-bottom:8px;">${safeName}</div>
+          <p style="color:var(--text-sm);font-size:.9rem;line-height:1.6;margin:0;">Ringkasan materi, daftar lampiran, dan tombol unduh sudah aktif sebagai simulasi lokal.</p>
+        </div>
+      </div>
+      <div class="admin-modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="this.closest('.admin-modal').remove()">Tutup</button>
+        <button class="btn btn-primary btn-sm" onclick="downloadFile('${String(name || 'Materi').replace(/'/g, "\\'")}.txt','Demo')">Unduh Preview</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
 }
 
 function downloadAll() {
-  showToast('Menyiapkan paket unduhan (74 MB)...', 'info');
-  setTimeout(() => showToast('✅ Semua materi berhasil diunduh!', 'success'), 2500);
+  const files = [...document.querySelectorAll('[onclick^="downloadFile"]')]
+    .map(btn => btn.getAttribute('onclick').match(/downloadFile\('([^']+)'/)?.[1])
+    .filter(Boolean);
+  makeDownload('GRCC_Materi_Unduhan_Demo.zip.txt', files.join('\n') || 'GRCC Academy download package');
+  showToast('✅ Paket unduhan demo berhasil dibuat.', 'success');
 }
 
 function filterDL(btn, filter) {

@@ -707,7 +707,61 @@
     return iso ? new Date(iso).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }) : '-';
   }
 
+  function readCertParam(key, fallback) {
+    return new URLSearchParams(location.search).get(key) || fallback;
+  }
+
+  function renderCertificatePreview() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('preview') !== 'admin') return false;
+
+    const name = readCertParam('name', 'Peserta GRCC Academy');
+    const programName = readCertParam('program', 'Program GRCC Academy');
+    const score = readCertParam('score', '100');
+    const certNum = readCertParam('cert', 'GRCC/2026/DEMO/PREVIEW');
+    const issuedDate = readCertParam('issued', new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }));
+
+    const title = document.querySelector('.cert-info-bar h2');
+    const subtitle = document.querySelector('.cert-info-bar p');
+    const recipient = document.querySelector('.cert-recipient-name');
+    const program = document.querySelector('.cert-prog-name');
+    const detailVals = document.querySelectorAll('.cert-detail-val');
+    const certNo = document.querySelector('.cert-num-val');
+    const issued = document.querySelector('.cert-issued-date');
+    const banner = document.querySelector('.cert-verify-banner span');
+    const badges = document.querySelector('.cert-info-badges');
+
+    if (title) title.textContent = 'Preview Sertifikat Admin';
+    if (subtitle) subtitle.textContent = 'Mode pratinjau dari Manajemen Sertifikat admin';
+    if (badges) {
+      badges.innerHTML = `
+        <span class="badge badge-success" style="padding:6px 14px;">&#10003; Diterbitkan</span>
+        <span class="badge badge-teal" style="padding:6px 14px;">Nilai ${score}</span>
+      `;
+    }
+    if (recipient) recipient.textContent = name;
+    if (program) program.textContent = programName;
+    if (detailVals[0]) detailVals[0].textContent = issuedDate;
+    if (detailVals[1]) detailVals[1].textContent = 'Sesuai data admin';
+    if (detailVals[2]) detailVals[2].textContent = `${score} / 100`;
+    if (detailVals[3]) detailVals[3].textContent = 'LULUS';
+    if (certNo) certNo.textContent = certNum;
+    if (issued) issued.textContent = `Diterbitkan: ${issuedDate}`;
+    if (banner) banner.innerHTML = `<strong>Preview Admin.</strong> Nomor sertifikat <strong>${certNum}</strong> sedang dilihat dari dashboard admin.`;
+
+    document.querySelectorAll('.cert-other-section, #dProgShortcuts').forEach((el) => {
+      if (el) el.style.display = 'none';
+    });
+
+    const actions = document.querySelector('.app-topbar-right');
+    if (actions && !document.getElementById('back-admin-cert')) {
+      actions.insertAdjacentHTML('afterbegin', '<a id="back-admin-cert" href="admin.html#sertifikat" class="btn btn-outline btn-sm">Kembali Admin</a>');
+    }
+    return true;
+  }
+
   function renderCertificateState() {
+    if (renderCertificatePreview()) return;
     const code = new URLSearchParams(location.search).get('code');
     const eligible = code
       ? getEnrolled().find(e => e.code === code && e.certificateIssued)
@@ -845,6 +899,14 @@ function closeSidebar() {
     document.querySelectorAll('a[href="dashboard.html"]').forEach(a => {
       a.href = dashMap[role] || 'dashboard.html';
     });
+    if (role === 'admin') {
+      document.querySelectorAll('a[href="certificate.html"]').forEach(a => {
+        a.href = 'admin.html#sertifikat';
+      });
+      document.querySelectorAll('a[href="profile.html"], a[href="programs.html"], a[href="enroll.html"]').forEach(a => {
+        a.href = 'admin.html#sertifikat';
+      });
+    }
     document.querySelectorAll('a[href="login.html"]').forEach(a => {
       a.addEventListener('click', e => {
         e.preventDefault();
