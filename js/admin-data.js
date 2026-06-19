@@ -8,140 +8,11 @@
   const MODULE_KEY = 'grcc_admin_modules';
   const QUESTION_KEY = 'grcc_admin_questions';
 
-  const defaultParticipants = [
-    {
-      id: 'p-siti-rahmawati',
-      name: 'Siti Rahmawati, S.H.',
-      email: 'siti.r@kemenkeu.go.id',
-      institution: 'Kementerian Keuangan',
-      program: 'ERM Fundamental',
-      instructorId: 'i-hendri',
-      progress: 0,
-      status: 'Menunggu',
-      joined: '07 Mei 2026',
-      certificateIssued: false,
-    },
-    {
-      id: 'p-budi-santoso',
-      name: 'Budi Santoso, M.M.',
-      email: 'bsantoso@pertamina.co.id',
-      institution: 'PT Pertamina (Persero)',
-      program: 'Internal Audit',
-      instructorId: 'i-ratna',
-      progress: 0,
-      status: 'Menunggu',
-      joined: '06 Mei 2026',
-      certificateIssued: false,
-    },
-    {
-      id: 'p-dewi-anggraini',
-      name: 'Dewi Anggraini',
-      email: 'dewi.a@bri.co.id',
-      institution: 'PT Bank BRI',
-      program: 'Compliance Management',
-      instructorId: 'i-maya',
-      progress: 14,
-      status: 'Menunggu',
-      joined: '05 Mei 2026',
-      certificateIssued: false,
-    },
-    {
-      id: 'p-ahmad-fauzi',
-      name: 'Ahmad Fauzi, S.E.',
-      email: 'a.fauzi@gmail.com',
-      institution: 'Individual',
-      program: 'ERM Fundamental',
-      instructorId: 'i-hendri',
-      progress: 68,
-      status: 'Aktif',
-      joined: '01 Mar 2026',
-      certificateIssued: false,
-    },
-    {
-      id: 'p-reza-putra',
-      name: 'Reza Putra, S.T.',
-      email: 'reza.p@pln.co.id',
-      institution: 'PT PLN (Persero)',
-      program: 'GRC for Government',
-      instructorId: 'i-hendri',
-      progress: 45,
-      status: 'Aktif',
-      joined: '28 Feb 2026',
-      certificateIssued: false,
-    },
-    {
-      id: 'p-maya-kusuma',
-      name: 'Maya Kusuma, M.Ak.',
-      email: 'm.kusuma@bpk.go.id',
-      institution: 'BPK RI',
-      program: 'ERM Fundamental',
-      instructorId: 'i-hendri',
-      progress: 100,
-      status: 'Lulus',
-      joined: '15 Jan 2026',
-      certificateIssued: false,
-    },
-    {
-      id: 'p-hendra-wijaya',
-      name: 'Hendra Wijaya',
-      email: 'hendra.w@bankmandiri.co.id',
-      institution: 'Bank Mandiri',
-      program: 'Internal Audit',
-      instructorId: 'i-ratna',
-      progress: 100,
-      status: 'Remedial',
-      joined: '12 Jan 2026',
-      certificateIssued: false,
-    },
-    {
-      id: 'p-sari-dewi',
-      name: 'Sari Dewi',
-      email: 'sari.dewi@ojk.go.id',
-      institution: 'OJK',
-      program: 'Compliance Management',
-      instructorId: 'i-maya',
-      progress: 100,
-      status: 'Lulus',
-      joined: '10 Jan 2026',
-      certificateIssued: false,
-    },
-  ];
+  const defaultParticipants = [];
 
-  const defaultInstructors = [
-    {
-      id: 'i-hendri',
-      name: 'Dr. Hendri Kurniawan',
-      role: 'Instruktur Senior',
-      programs: ['ERM Fundamental', 'GRC for Government'],
-      rating: 4.9,
-      status: 'Aktif',
-    },
-    {
-      id: 'i-ratna',
-      name: 'Ratna Prameswari, CIA',
-      role: 'Instruktur Audit',
-      programs: ['Internal Audit'],
-      rating: 4.8,
-      status: 'Aktif',
-    },
-    {
-      id: 'i-maya',
-      name: 'Maya Wulandari, CRMP',
-      role: 'Instruktur Compliance',
-      programs: ['Compliance Management'],
-      rating: 4.7,
-      status: 'Aktif',
-    },
-  ];
+  const defaultInstructors = [];
 
-  const defaultPrograms = [
-    { id: 'prog-erm', name: 'ERM Fundamental', category: 'Risk Management', modules: 8, status: 'Aktif', instructorId: 'i-hendri' },
-    { id: 'prog-audit', name: 'Internal Audit', category: 'Audit', modules: 6, status: 'Aktif', instructorId: 'i-ratna' },
-    { id: 'prog-compliance', name: 'Compliance Management', category: 'Compliance', modules: 7, status: 'Aktif', instructorId: 'i-maya' },
-    { id: 'prog-gov', name: 'GRC for Government', category: 'Governance', modules: 5, status: 'Aktif', instructorId: 'i-hendri' },
-    { id: 'prog-esg', name: 'ESG & Keberlanjutan', category: 'ESG', modules: 4, status: 'Aktif', instructorId: 'i-maya' },
-    { id: 'prog-coso', name: 'GRC Advanced — COSO 2017', category: 'Risk Management', modules: 0, status: 'Draft', instructorId: 'i-hendri' },
-  ];
+  const defaultPrograms = [];
 
   const academyProgramCodes = {
     'erm fundamental': 'ERM-2026',
@@ -151,22 +22,9 @@
     'esg keberlanjutan': 'ESG-GRCC',
   };
 
-  const defaultModules = [
-    { id: 'mod-erm-1', title: 'Pengantar GRC & Kerangka Kerja', program: 'ERM Fundamental', order: 1, files: 'PDF, PPTX', status: 'Aktif' },
-    { id: 'mod-erm-2', title: 'Corporate Governance', program: 'ERM Fundamental', order: 2, files: 'PDF, PPTX', status: 'Aktif' },
-    { id: 'mod-erm-3', title: 'Identifikasi & Penilaian Risiko', program: 'ERM Fundamental', order: 3, files: 'PDF, XLSX', status: 'Aktif' },
-    { id: 'mod-erm-4', title: 'Risk Appetite & Tolerance', program: 'ERM Fundamental', order: 4, files: 'PDF', status: 'Aktif' },
-    { id: 'mod-erm-6', title: 'Risk Treatment & Mitigasi', program: 'ERM Fundamental', order: 6, files: 'PDF, PPTX', status: 'Aktif' },
-    { id: 'mod-erm-8', title: 'Studi Kasus ERM Indonesia', program: 'ERM Fundamental', order: 8, files: '—', status: 'Draft' },
-  ];
+  const defaultModules = [];
 
-  const defaultQuestions = [
-    { id: 'Q-001', question: 'Perusahaan X mengidentifikasi risiko dengan Risk Score = 16...', type: 'Pilihan Ganda', exam: 'Quiz M6', module: 'Modul 6', moduleId: 'mod-erm-6', difficulty: 'Sedang' },
-    { id: 'Q-002', question: 'Manakah pernyataan yang BENAR mengenai Residual Risk?', type: 'Pilihan Ganda', exam: 'Quiz M6', module: 'Modul 6', moduleId: 'mod-erm-6', difficulty: 'Mudah' },
-    { id: 'Q-003', question: 'Pemilihan risk treatment harus mempertimbangkan cost-benefit...', type: 'Benar/Salah', exam: 'Quiz M6', module: 'Modul 6', moduleId: 'mod-erm-6', difficulty: 'Mudah' },
-    { id: 'Q-004', question: 'PT Bank Nusantara membeli asuransi untuk melindungi gedung...', type: 'Pilihan Ganda', exam: 'Post-Test', module: 'Modul 6', moduleId: 'mod-erm-6', difficulty: 'Sedang' },
-    { id: 'Q-005', question: '[STUDI KASUS] PT Maju Sejahtera rencana ekspansi ke negara...', type: 'Studi Kasus', exam: 'Final Exam', module: 'Modul 6-8', moduleId: 'mod-erm-8', difficulty: 'Sulit' },
-  ];
+  const defaultQuestions = [];
 
   function canStore() {
     try {

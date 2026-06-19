@@ -283,11 +283,7 @@
     Advanced: '<span class="badge" style="background:#fdf4ff;color:#7e22ce;border:1px solid #e9d5ff;">Advanced</span>',
   };
 
-  const DEMO_ENROLLMENTS = [
-    { code: 'ERM-2026', progress: 68, currentModule: 6, status: 'active', completedModules: [1, 2, 3, 4, 5] },
-    { code: 'COMP-REG', progress: 15, currentModule: 2, status: 'active', completedModules: [1] },
-    { code: 'GCG-BASIC', progress: 100, currentModule: 6, status: 'done', completedModules: [1, 2, 3, 4, 5, 6], quizPassed: true, finalPassed: true, certificateIssued: true, finalScore: 92 },
-  ];
+  const DEMO_ENROLLMENTS = [];
 
   const ADMIN_PARTICIPANT_KEY = 'grcc_admin_participants';
 

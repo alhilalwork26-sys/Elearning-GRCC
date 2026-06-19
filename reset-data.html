@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Data — GRCC Academy</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      padding: 24px;
+      font-family: var(--font-b);
+    }
+    .reset-card {
+      width: min(520px, 100%);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-lg);
+      padding: 28px;
+      text-align: center;
+    }
+    .reset-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--teal-lt);
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 14px;
+      font-size: 1.6rem;
+      font-weight: 900;
+    }
+    h1 {
+      font-family: var(--font-h);
+      font-size: 1.35rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    p {
+      color: var(--text-sm);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    .reset-list {
+      text-align: left;
+      background: var(--bg);
+      border-radius: var(--r-md);
+      padding: 12px 14px;
+      color: var(--text-xs);
+      font-size: .82rem;
+      line-height: 1.6;
+      margin-bottom: 18px;
+      max-height: 150px;
+      overflow: auto;
+    }
+    .reset-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <main class="reset-card">
+    <div class="reset-icon">✓</div>
+    <h1>Data Website Dikosongkan</h1>
+    <p>Semua data lokal GRCC Academy di browser ini sudah dihapus. Website akan kembali ke kondisi kosong.</p>
+    <div class="reset-list" id="resetList">Menghapus data...</div>
+    <div class="reset-actions">
+      <a class="btn btn-primary" href="index.html">Kembali ke Beranda</a>
+      <a class="btn btn-outline" href="login.html">Buka Login</a>
+    </div>
+  </main>
+
+  <script>
+    const removed = [];
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('grcc_') || key === '__grcc_test__') {
+        removed.push(key);
+        localStorage.removeItem(key);
+      }
+    });
+    document.getElementById('resetList').innerHTML = removed.length
+      ? removed.map((key) => `<div>${key}</div>`).join('')
+      : '<div>Tidak ada data lokal yang tersisa.</div>';
+  </script>
+</body>
+</html>
