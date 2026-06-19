@@ -143,6 +143,14 @@
     { id: 'prog-coso', name: 'GRC Advanced — COSO 2017', category: 'Risk Management', modules: 0, status: 'Draft', instructorId: 'i-hendri' },
   ];
 
+  const academyProgramCodes = {
+    'erm fundamental': 'ERM-2026',
+    'internal audit': 'AUDIT-INT',
+    'compliance management': 'COMP-REG',
+    'grc for government': 'GCG-BASIC',
+    'esg keberlanjutan': 'ESG-GRCC',
+  };
+
   const defaultModules = [
     { id: 'mod-erm-1', title: 'Pengantar GRC & Kerangka Kerja', program: 'ERM Fundamental', order: 1, files: 'PDF, PPTX', status: 'Aktif' },
     { id: 'mod-erm-2', title: 'Corporate Governance', program: 'ERM Fundamental', order: 2, files: 'PDF, PPTX', status: 'Aktif' },
@@ -206,6 +214,79 @@
       .trim();
   }
 
+  function participantKey(participant) {
+    return participant.id
+      || `${String(participant.email || '').toLowerCase()}::${normalizeName(participant.program)}`;
+  }
+
+  function mergeDefaultParticipants(stored) {
+    const merged = [...stored];
+    const keys = new Set(merged.map(participantKey));
+    defaultParticipants.forEach((participant) => {
+      const key = participantKey(participant);
+      if (!keys.has(key)) {
+        merged.push(clone(participant));
+        keys.add(key);
+      }
+    });
+    return merged;
+  }
+
+  function academyCodeForProgram(programName) {
+    const normalized = normalizeName(programName);
+    return academyProgramCodes[normalized]
+      || Object.entries(academyProgramCodes).find(([name]) => normalized.includes(name) || name.includes(normalized))?.[1]
+      || 'ERM-2026';
+  }
+
+  function syncParticipantEnrollmentToAcademy(participant) {
+    const email = String(participant.email || '').toLowerCase();
+    if (!email || email === '-') return null;
+    const code = academyCodeForProgram(participant.program);
+    const program = getPrograms().find((item) => normalizeName(item.name) === normalizeName(participant.program));
+    const modules = Math.max(Number(program?.modules || 0), 1);
+    const key = `grcc_enrolled_${email}`;
+    const enrollments = readJson(key, []);
+    const now = new Date().toISOString();
+    const progress = Number(participant.progress || 0);
+    const index = enrollments.findIndex((enrollment) => enrollment.code === code);
+    const base = index >= 0 ? enrollments[index] : {
+      code,
+      title: participant.program || code,
+      category: program?.category || 'GRC',
+      level: 'Intermediate',
+      icon: '📘',
+      modules,
+      hours: `${modules * 3} jam`,
+      enrolledAt: now,
+      currentModule: 1,
+      completedModules: [],
+      status: 'active',
+    };
+    const completedCount = participant.certificateIssued
+      ? modules
+      : Math.floor((progress / 100) * modules);
+    const next = {
+      ...base,
+      title: base.title || participant.program || code,
+      modules: base.modules || modules,
+      progress,
+      currentModule: participant.certificateIssued ? modules : Math.max(1, Math.min(modules, completedCount + 1)),
+      completedModules: Array.from({ length: completedCount }, (_, idx) => idx + 1),
+      status: participant.certificateIssued ? 'done' : (progress > 0 ? 'active' : base.status || 'active'),
+      quizPassed: participant.certificateIssued ? true : Boolean(base.quizPassed),
+      finalPassed: participant.certificateIssued ? true : Boolean(base.finalPassed),
+      finalScore: participant.certificateIssued ? (base.finalScore || 100) : (base.finalScore || null),
+      finalCompletedAt: participant.certificateIssued ? (base.finalCompletedAt || participant.certificateIssuedAt || now) : (base.finalCompletedAt || null),
+      certificateIssued: Boolean(participant.certificateIssued),
+      certificateIssuedAt: participant.certificateIssuedAt || base.certificateIssuedAt || null,
+    };
+    if (index >= 0) enrollments[index] = next;
+    else enrollments.unshift(next);
+    writeJson(key, enrollments);
+    return next;
+  }
+
   function resolveQuestionModule(question, modules) {
     if (question.moduleId && modules.some((module) => module.id === question.moduleId)) {
       return question.moduleId;
@@ -238,7 +319,11 @@
 
   function getParticipants() {
     const stored = readJson(PARTICIPANT_KEY, null);
-    if (stored) return stored;
+    if (stored) {
+      const merged = mergeDefaultParticipants(stored);
+      if (merged.length !== stored.length) writeJson(PARTICIPANT_KEY, merged);
+      return merged;
+    }
     const seeded = clone(defaultParticipants);
     writeJson(PARTICIPANT_KEY, seeded);
     return seeded;
@@ -404,20 +489,24 @@
   }
 
   function approveParticipant(name) {
-    return updateParticipantByName(name, {
+    const participant = updateParticipantByName(name, {
       status: 'Aktif',
       approvedAt: new Date().toISOString(),
     });
+    if (participant) syncParticipantEnrollmentToAcademy(participant);
+    return participant;
   }
 
   function issueCertificate(name) {
-    return updateParticipantByName(name, {
+    const participant = updateParticipantByName(name, {
       status: 'Lulus',
       progress: 100,
       certificateIssued: true,
       certificateNo: 'GRCC-' + Date.now().toString().slice(-8),
       certificateIssuedAt: new Date().toISOString(),
     });
+    if (participant) syncParticipantEnrollmentToAcademy(participant);
+    return participant;
   }
 
   function getInstructorSummary() {
