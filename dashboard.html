@@ -144,6 +144,34 @@
       box-shadow: 0 0 0 3px rgba(20,184,166,.1);
     }
     .d-search-input::placeholder { color: #94a3b8; }
+    .d-search-results {
+      position: absolute; top: calc(100% + 10px); left: 0; right: 0;
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: 16px; box-shadow: 0 18px 45px rgba(11,36,71,.14);
+      padding: 8px; display: none; z-index: 120;
+      max-height: 360px; overflow-y: auto;
+    }
+    .d-search-results.open { display: block; }
+    .d-search-result {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 12px; border: 0; border-radius: 12px;
+      background: transparent; color: var(--navy); text-align: left;
+      cursor: pointer; font-family: var(--font-b, sans-serif);
+    }
+    .d-search-result:hover, .d-search-result:focus {
+      outline: none; background: #F0F5FF;
+    }
+    .d-search-result-icon {
+      width: 36px; height: 36px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(20,184,166,.12); color: var(--teal);
+      flex: 0 0 auto; font-size: 1rem;
+    }
+    .d-search-result-title { font-weight: 800; font-size: .875rem; line-height: 1.35; }
+    .d-search-result-meta { margin-top: 2px; color: #64748b; font-size: .75rem; }
+    .d-search-empty {
+      padding: 18px 14px; color: #64748b; font-size: .875rem; text-align: center;
+    }
     .d-topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
     .d-action-btn {
       width: 40px; height: 40px; border-radius: 50%;
@@ -166,6 +194,9 @@
       transition: all .15s ease;
     }
     .d-user-chip:hover { border-color: var(--teal); }
+    .d-user-chip[aria-expanded="true"], .d-action-btn[aria-expanded="true"] {
+      border-color: var(--teal); background: #ECFEFF; color: var(--navy);
+    }
     .d-user-chip-avatar {
       width: 32px; height: 32px; border-radius: 50%;
       background: var(--teal); color: white;
@@ -173,6 +204,39 @@
       display: flex; align-items: center; justify-content: center;
     }
     .d-user-chip span { font-size: .875rem; font-weight: 600; color: var(--navy); }
+    .d-topbar-popover {
+      position: absolute; top: calc(100% + 10px); right: 28px;
+      width: min(360px, calc(100vw - 32px));
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: 16px; box-shadow: 0 18px 45px rgba(11,36,71,.16);
+      padding: 10px; display: none; z-index: 130;
+    }
+    .d-topbar-popover.open { display: block; }
+    .d-popover-head {
+      padding: 8px 10px 12px; border-bottom: 1px solid #E8EEF7;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .d-popover-title { font-weight: 900; color: var(--navy); font-size: .9rem; }
+    .d-popover-link {
+      color: var(--teal); font-size: .75rem; font-weight: 800; text-decoration: none;
+    }
+    .d-popover-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 10px; border-radius: 12px; color: var(--navy);
+      text-decoration: none; border: 0; background: transparent; width: 100%;
+      font-family: var(--font-b, sans-serif); text-align: left; cursor: pointer;
+    }
+    .d-popover-item:hover { background: #F0F5FF; }
+    .d-popover-icon {
+      width: 34px; height: 34px; border-radius: 12px; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(20,184,166,.12); color: var(--teal); font-weight: 900;
+    }
+    .d-popover-text { flex: 1; min-width: 0; }
+    .d-popover-main { font-weight: 800; font-size: .85rem; line-height: 1.35; }
+    .d-popover-sub { margin-top: 2px; color: #64748b; font-size: .75rem; line-height: 1.45; }
+    .d-user-menu { right: 28px; width: 260px; }
+    .d-user-menu .d-popover-item { align-items: center; }
 
     /* ── Scrollable content ── */
     .d-content { flex: 1; padding: 24px 28px 40px; }
@@ -609,27 +673,89 @@
         <svg class="d-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input type="text" class="d-search-input" placeholder="Cari program, modul, materi...">
+        <input type="text" class="d-search-input" id="dashboardSearchInput" placeholder="Cari program, modul, materi..." autocomplete="off" aria-controls="dashboardSearchResults" aria-expanded="false">
+        <div class="d-search-results" id="dashboardSearchResults" role="listbox" aria-label="Hasil pencarian"></div>
       </div>
 
       <div class="d-topbar-actions">
-        <button class="d-action-btn" title="Pesan">
+        <button class="d-action-btn" id="dashboardMessageBtn" title="Pesan" aria-label="Pesan" aria-controls="dashboardMessagePanel" aria-expanded="false">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
           </svg>
         </button>
-        <button class="d-action-btn" title="Notifikasi">
+        <button class="d-action-btn" id="dashboardNotifBtn" title="Notifikasi" aria-label="Notifikasi" aria-controls="dashboardNotifPanel" aria-expanded="false">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
           <span class="notif-dot"></span>
         </button>
-        <div class="d-user-chip">
+        <div class="d-user-chip" id="dashboardUserChip" role="button" tabindex="0" aria-controls="dashboardUserMenu" aria-expanded="false">
           <div class="d-user-chip-avatar">AF</div>
           <span id="dTopbarName">Ahmad Fauzi</span>
         </div>
+      </div>
+
+      <div class="d-topbar-popover" id="dashboardMessagePanel" aria-label="Pesan terbaru">
+        <div class="d-popover-head">
+          <div class="d-popover-title">Pesan</div>
+          <a class="d-popover-link" href="helpdesk.html">Buka Helpdesk</a>
+        </div>
+        <a class="d-popover-item" href="helpdesk.html">
+          <span class="d-popover-icon">?</span>
+          <span class="d-popover-text">
+            <span class="d-popover-main">Butuh bantuan belajar?</span>
+            <span class="d-popover-sub">Kirim pertanyaan ke tim GRCC melalui Helpdesk.</span>
+          </span>
+        </a>
+        <a class="d-popover-item" href="programs.html">
+          <span class="d-popover-icon">P</span>
+          <span class="d-popover-text">
+            <span class="d-popover-main">Konsultasi pilihan program</span>
+            <span class="d-popover-sub">Lihat program yang tersedia dan lanjutkan enroll.</span>
+          </span>
+        </a>
+      </div>
+
+      <div class="d-topbar-popover" id="dashboardNotifPanel" aria-label="Notifikasi terbaru">
+        <div class="d-popover-head">
+          <div class="d-popover-title">Notifikasi</div>
+          <a class="d-popover-link" href="enroll.html">Enroll</a>
+        </div>
+        <a class="d-popover-item" href="enroll.html">
+          <span class="d-popover-icon">+</span>
+          <span class="d-popover-text">
+            <span class="d-popover-main">Program baru siap diikuti</span>
+            <span class="d-popover-sub">Enroll program untuk membuka materi, quiz, ujian, dan sertifikat.</span>
+          </span>
+        </a>
+        <a class="d-popover-item" href="certificate.html">
+          <span class="d-popover-icon">S</span>
+          <span class="d-popover-text">
+            <span class="d-popover-main">Sertifikat otomatis tersedia</span>
+            <span class="d-popover-sub">Selesaikan final exam untuk menampilkan sertifikat peserta.</span>
+          </span>
+        </a>
+      </div>
+
+      <div class="d-topbar-popover d-user-menu" id="dashboardUserMenu" aria-label="Menu akun">
+        <a class="d-popover-item" href="profile.html">
+          <span class="d-popover-icon">A</span>
+          <span class="d-popover-text"><span class="d-popover-main">Profil Saya</span></span>
+        </a>
+        <a class="d-popover-item" href="dashboard.html">
+          <span class="d-popover-icon">D</span>
+          <span class="d-popover-text"><span class="d-popover-main">Dashboard</span></span>
+        </a>
+        <a class="d-popover-item" href="reset-data.html">
+          <span class="d-popover-icon">R</span>
+          <span class="d-popover-text"><span class="d-popover-main">Reset Data Lokal</span></span>
+        </a>
+        <button class="d-popover-item" type="button" id="dashboardLogoutBtn">
+          <span class="d-popover-icon">L</span>
+          <span class="d-popover-text"><span class="d-popover-main">Keluar</span></span>
+        </button>
       </div>
     </div>
 
@@ -855,7 +981,7 @@
 
 <script src="js/academy-data.js"></script>
 <script>
-const { seedDemoEnrollmentsForCurrentUser, getProgramModules, moduleHref } = window.GRCCAcademy;
+const { PROGRAMS, seedDemoEnrollmentsForCurrentUser, getProgramModules, moduleHref } = window.GRCCAcademy;
 
 // ── Role guard + populate UI ──
 (function() {
@@ -900,6 +1026,188 @@ const { seedDemoEnrollmentsForCurrentUser, getProgramModules, moduleHref } = win
       localStorage.removeItem('grcc_user_key');
       window.location.href = 'login.html';
     });
+  });
+})();
+
+// ── Topbar controls: search, message, notification, account ──
+(function() {
+  var searchInput = document.getElementById('dashboardSearchInput');
+  var searchResults = document.getElementById('dashboardSearchResults');
+  var messageBtn = document.getElementById('dashboardMessageBtn');
+  var messagePanel = document.getElementById('dashboardMessagePanel');
+  var notifBtn = document.getElementById('dashboardNotifBtn');
+  var notifPanel = document.getElementById('dashboardNotifPanel');
+  var userChip = document.getElementById('dashboardUserChip');
+  var userMenu = document.getElementById('dashboardUserMenu');
+  var logoutBtn = document.getElementById('dashboardLogoutBtn');
+  var popovers = [
+    { button: messageBtn, panel: messagePanel },
+    { button: notifBtn, panel: notifPanel },
+    { button: userChip, panel: userMenu }
+  ];
+
+  function closeSearch() {
+    if (!searchResults || !searchInput) return;
+    searchResults.classList.remove('open');
+    searchInput.setAttribute('aria-expanded', 'false');
+  }
+
+  function closePopovers(exceptPanel) {
+    popovers.forEach(function(item) {
+      if (!item.button || !item.panel || item.panel === exceptPanel) return;
+      item.panel.classList.remove('open');
+      item.button.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function togglePopover(button, panel) {
+    if (!button || !panel) return;
+    var willOpen = !panel.classList.contains('open');
+    closePopovers(panel);
+    closeSearch();
+    panel.classList.toggle('open', willOpen);
+    button.setAttribute('aria-expanded', String(willOpen));
+  }
+
+  function openFromKeyboard(event, button, panel) {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    togglePopover(button, panel);
+  }
+
+  function searchItems() {
+    var enrolled = seedDemoEnrollmentsForCurrentUser();
+    var items = [];
+
+    enrolled.forEach(function(program) {
+      items.push({
+        title: program.title,
+        meta: 'Program saya · Progress ' + program.progress + '%',
+        href: moduleHref(program),
+        icon: program.icon || 'P'
+      });
+      getProgramModules(program.code).forEach(function(moduleTitle, index) {
+        items.push({
+          title: moduleTitle,
+          meta: program.title,
+          href: 'materi.html#prog=' + encodeURIComponent(program.code) + '&mod=' + encodeURIComponent(index + 1),
+          icon: 'M'
+        });
+      });
+    });
+
+    PROGRAMS.forEach(function(program) {
+      if (enrolled.some(function(active) { return active.code === program.code; })) return;
+      items.push({
+        title: program.title,
+        meta: program.category + ' · ' + program.hours,
+        href: 'program-detail.html?code=' + encodeURIComponent(program.code),
+        icon: program.icon || '+'
+      });
+    });
+
+    return items;
+  }
+
+  function renderSearchResults() {
+    if (!searchInput || !searchResults) return [];
+    var query = searchInput.value.trim().toLowerCase();
+    if (!query) {
+      closeSearch();
+      searchResults.innerHTML = '';
+      return [];
+    }
+
+    var matches = searchItems().filter(function(item) {
+      return (item.title + ' ' + item.meta).toLowerCase().includes(query);
+    }).slice(0, 8);
+
+    searchResults.classList.add('open');
+    searchInput.setAttribute('aria-expanded', 'true');
+    if (!matches.length) {
+      searchResults.innerHTML = '<div class="d-search-empty">Tidak ada hasil. Coba kata kunci lain.</div>';
+      return [];
+    }
+
+    searchResults.innerHTML = matches.map(function(item, index) {
+      return '<button class="d-search-result" type="button" role="option" data-index="' + index + '">' +
+        '<span class="d-search-result-icon">' + item.icon + '</span>' +
+        '<span>' +
+          '<span class="d-search-result-title">' + item.title + '</span>' +
+          '<span class="d-search-result-meta">' + item.meta + '</span>' +
+        '</span>' +
+      '</button>';
+    }).join('');
+
+    searchResults.querySelectorAll('.d-search-result').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var target = matches[Number(button.getAttribute('data-index'))];
+        if (target) window.location.href = target.href;
+      });
+    });
+
+    return matches;
+  }
+
+  if (messageBtn) messageBtn.addEventListener('click', function() { togglePopover(messageBtn, messagePanel); });
+  if (notifBtn) {
+    notifBtn.addEventListener('click', function() {
+      togglePopover(notifBtn, notifPanel);
+      var dot = notifBtn.querySelector('.notif-dot');
+      if (dot) dot.style.display = 'none';
+    });
+  }
+  if (userChip) {
+    userChip.addEventListener('click', function() { togglePopover(userChip, userMenu); });
+    userChip.addEventListener('keydown', function(event) { openFromKeyboard(event, userChip, userMenu); });
+  }
+  if (messageBtn) messageBtn.addEventListener('keydown', function(event) { openFromKeyboard(event, messageBtn, messagePanel); });
+  if (notifBtn) notifBtn.addEventListener('keydown', function(event) { openFromKeyboard(event, notifBtn, notifPanel); });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      closePopovers();
+      renderSearchResults();
+    });
+    searchInput.addEventListener('focus', renderSearchResults);
+    searchInput.addEventListener('keydown', function(event) {
+      var matches = renderSearchResults();
+      if (event.key === 'Enter' && matches[0]) {
+        event.preventDefault();
+        window.location.href = matches[0].href;
+      }
+      if (event.key === 'Escape') {
+        closeSearch();
+        searchInput.blur();
+      }
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function() {
+      localStorage.removeItem('grcc_role');
+      localStorage.removeItem('grcc_name');
+      localStorage.removeItem('grcc_email');
+      localStorage.removeItem('grcc_user_key');
+      window.location.href = 'login.html';
+    });
+  }
+
+  document.addEventListener('click', function(event) {
+    var target = event.target;
+    var clickedSearch = searchInput && searchInput.parentElement && searchInput.parentElement.contains(target);
+    var clickedPopover = popovers.some(function(item) {
+      return item.panel && item.panel.contains(target) || item.button && item.button.contains(target);
+    });
+    if (!clickedSearch) closeSearch();
+    if (!clickedPopover) closePopovers();
+  });
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeSearch();
+      closePopovers();
+    }
   });
 })();
 
