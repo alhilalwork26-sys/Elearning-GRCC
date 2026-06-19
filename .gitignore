@@ -1,15 +1,4 @@
+node_modules
+.next
+.env*.local
 .DS_Store
-
-# Local tool/editor state
-.claude/
-.vscode/
-
-# Dependencies and generated output
-node_modules/
-dist/
-build/
-
-# Logs and local environment
-*.log
-.env
-.env.*
